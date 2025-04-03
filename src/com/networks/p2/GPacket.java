@@ -3,6 +3,11 @@ package com.networks.p2;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.BufferUnderflowException;
+import java.io.InputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
+import java.io.IOException;
+
 
 public class GPacket {
     public static final byte VERSION_NUM = 1;
@@ -88,6 +93,43 @@ public class GPacket {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public static GPacket tcpRead(InputStream in) throws IOException {
+        // Step 1: Read fixed-size header (16 bytes)
+        byte[] header = new byte[16];
+        int totalRead = 0;
+        while (totalRead < 16) {
+            int bytesRead = in.read(header, totalRead, 16 - totalRead);
+            if (bytesRead == -1) throw new EOFException("Stream closed during header read.");
+            totalRead += bytesRead;
+        }
+
+        // Step 2: Extract data length (last 4 bytes of header)
+        ByteBuffer headerBuffer = ByteBuffer.wrap(header);
+        headerBuffer.order(ByteOrder.BIG_ENDIAN); // match protocol's endianness
+        headerBuffer.position(12); // jump to the 'length' field
+        int length = headerBuffer.getInt();
+
+        // Validate length (optional safety check)
+        if (length < 0 || length > 10_000_000) {
+            throw new IOException("Suspicious packet length: " + length);
+        }
+
+        // Step 3: Read 'length' bytes of data
+        byte[] data = new byte[length];
+        totalRead = 0;
+        while (totalRead < length) {
+            int bytesRead = in.read(data, totalRead, length - totalRead);
+            if (bytesRead == -1) throw new EOFException("Stream closed during data read.");
+            totalRead += bytesRead;
+        }
+
+        // Step 4: Combine header + data into one packet
+        ByteArrayOutputStream fullPacket = new ByteArrayOutputStream();
+        fullPacket.write(header);
+        fullPacket.write(data);
+        return convertFromBytes(fullPacket.toByteArray());
     }
 
     public String printInfo() {

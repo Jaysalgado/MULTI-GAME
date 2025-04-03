@@ -22,7 +22,7 @@ public class ClientControl {
     public ClientControl() {
 
         try {
-            tcpSocket = new Socket(12345);
+            tcpSocket = new Socket();
             out = new DataOutputStream(tcpSocket.getOutputStream());
             in = new DataInputStream(tcpSocket.getInputStream());
             System.out.println("Server started on port 12345");
@@ -33,19 +33,19 @@ public class ClientControl {
         } catch (IOException e) {
             System.out.println("Error: " + e.getMessage());
         }
-
     }
     private void gameStart(){
-        new Thread(this::tcpListen);
-        new Thread(this::udpListen);
+        new Thread(this::tcpListen).start();
+        new Thread(this::udpListen).start();
     }
 
     private void tcpListen(){
         while(true){
             try {
 
-                byte message = in.readByte();
-                switch (message) {
+                GPacket packet = GPacket.tcpRead(in);
+
+                switch (packet.getType()) {
                     case GPacket.TYPE_QUESTION:
                         break;
                     case GPacket.TYPE_NEXT:
@@ -58,7 +58,7 @@ public class ClientControl {
                         System.out.println("Score: " + score);
                         break;
                     default:
-                        System.out.println("Unknown message type: " + message);
+                        System.out.println("Unknown message type: " + packet.getType());
                 }
 
             } catch ( IOException e) {
@@ -71,6 +71,17 @@ public class ClientControl {
 
     }
     private void udpListen(){
+        while(true){
+            try {
+                byte[] buffer = new byte[1024];
+                datagramPacket = new DatagramPacket(buffer, buffer.length);
+                receiveSocket.receive(datagramPacket);
+                GPacket gPacket = GPacket.convertFromBytes(datagramPacket.getData());
+                System.out.println("Received UDP packet: " + gPacket);
+            } catch (IOException e) {
+                System.out.println("Error: " + e.getMessage());
+            }
+        }
 
     }
     private void buzz() {
