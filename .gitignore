@@ -3,6 +3,8 @@
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
+src/com/networks/p2/Test.java
+
 
 ### Eclipse ###
 .apt_generated

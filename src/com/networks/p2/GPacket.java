@@ -14,7 +14,7 @@ public class GPacket {
     public static final byte TYPE_QUESTION   = 0x01;
     public static final byte TYPE_NEXT       = 0x02;
     public static final byte TYPE_BUZZ       = 0x03;
-    public static final byte TYPE_BUZZ_RES       = 0x04;
+    public static final byte TYPE_BUZZ_RES   = 0x04;
     public static final byte TYPE_ANSWER     = 0x05;
     public static final byte TYPE_ANSWER_RES = 0x06;
     public static final byte TYPE_KILL       = 0x07;
