@@ -16,6 +16,7 @@ public class Server {
     private final Map<Short, ClientThread> activeClients = new ConcurrentHashMap<>();
     private final Map<Short, Integer> clientScores = new ConcurrentHashMap<>();
     private final BlockingQueue<GPacket> buzzQueue = new LinkedBlockingQueue<>();
+    private final Map<Integer, Integer> correctAnswers = new HashMap<>();
 
     private final List<Question> questionBank = new ArrayList<>();
 
@@ -159,26 +160,12 @@ public class Server {
                 if (line.trim().isEmpty()) continue;
 
                 String[] parts = line.split(",");
-                if (parts.length != 6) {
+                if (parts.length != 5) {
                     System.out.println("[SERVER] Skipping malformed line: " + line);
                     continue;
                 }
 
-                String[] qArray = Arrays.copyOfRange(parts, 0, 5);
-                int correctIndex;
-
-                try {
-                    correctIndex = Integer.parseInt(parts[5].trim());
-
-                    if (correctIndex < 0 || correctIndex > 3) {
-                        continue;
-                    }
-
-                } catch (NumberFormatException e) {
-                    continue;
-                }
-
-                Question q = new Question(qArray, correctIndex);
+                Question q = new Question(parts);
                 questionBank.add(q);
             }
 
@@ -188,10 +175,11 @@ public class Server {
         }
     }
 
-
     public List<Question> getQuestionBank() {
         return questionBank;
     }
+
+    public Map<Integer, Integer> getCorrectAnswers() { return correctAnswers; }
 
     public Map<Short, Integer> getClientScores() {
         return clientScores;
