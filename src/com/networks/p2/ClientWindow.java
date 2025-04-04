@@ -43,6 +43,7 @@ public class ClientWindow implements ActionListener
         for(int index=0; index<options.length; index++)
         {
             options[index] = new JRadioButton("Option " + (index+1));  // represents an option
+            options[index].setActionCommand("Option " + (index + 1));
             // if a radio button is clicked, the event would be thrown to this class to handle
             options[index].addActionListener(this);
             options[index].setBounds(10, 110+(index*20), 350, 20);
@@ -163,7 +164,6 @@ public class ClientWindow implements ActionListener
 //            submit.setEnabled(false);
 //        }
 
-        question.setText("Q2. This is another test problem " + random.nextInt());
 
         // you can also enable disable radio buttons
 //		options[random.nextInt(4)].setEnabled(false);
