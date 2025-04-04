@@ -23,11 +23,14 @@ public class ClientWindow implements ActionListener
 
     private static SecureRandom random = new SecureRandom();
 
+    private ClientControl gameManager;
+
     // write setters and getters as you need
 
     public ClientWindow()
     {
-        JOptionPane.showMessageDialog(window, "This is a trivia game");
+//        JOptionPane.showMessageDialog(window, "This is a trivia game");
+        gameManager = new ClientControl();
 
         window = new JFrame("Trivia");
         question = new JLabel("Q1. This is a sample question"); // represents the question
@@ -67,6 +70,7 @@ public class ClientWindow implements ActionListener
         submit.setBounds(200, 300, 100, 20);
         submit.addActionListener(this);  // calls actionPerformed of this class
         window.add(submit);
+        submit.setEnabled(false);
 
 
         window.setSize(400,400);
@@ -75,7 +79,38 @@ public class ClientWindow implements ActionListener
         window.setVisible(true);
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setResizable(false);
+
+        ClientControl.setGameStateListener(new GameState() {
+            @Override
+            public void onCanBuzzChanged(boolean canBuzz) {
+                SwingUtilities.invokeLater(() ->
+                        poll.setEnabled(canBuzz)
+                );
+            }
+
+            @Override
+            public void onCanAnswerChanged(boolean canAnswer) {
+                SwingUtilities.invokeLater(() -> submit.setEnabled(canAnswer));
+            }
+
+            @Override
+            public void onQuestionReceived (String[] q) {
+                SwingUtilities.invokeLater(() -> {
+                    question.setText(q[0]);
+                    optionGroup.clearSelection();
+                    int  i = 1;
+                    for (JRadioButton option : options) {
+                        option.setText(q[i]);
+                        option.setEnabled(true);
+                        i++;
+                    }
+                });
+            }
+        });
+
     }
+
+
 
     // this method is called when you check/uncheck any radio button
     // this method is called when you press either of the buttons- submit/poll
@@ -96,7 +131,8 @@ public class ClientWindow implements ActionListener
                 break;
             case "Option 4":	// Your code here
                 break;
-            case "Poll":		// Your code here
+            case "Poll":
+                gameManager.buzz();
                 break;
             case "Submit":		// Your code here
                 break;
@@ -106,16 +142,17 @@ public class ClientWindow implements ActionListener
 
         // test code below to demo enable/disable components
         // DELETE THE CODE BELOW FROM HERE***
-        if(poll.isEnabled())
-        {
-            poll.setEnabled(false);
-            submit.setEnabled(true);
-        }
-        else
-        {
-            poll.setEnabled(true);
-            submit.setEnabled(false);
-        }
+//        if(poll.isEnabled())
+//        {
+////          poll.setEnabled(false);
+//            gameManager.buzz();
+//            submit.setEnabled(true);
+//        }
+//        else
+//        {
+//            poll.setEnabled(true);
+//            submit.setEnabled(false);
+//        }
 
         question.setText("Q2. This is another test problem " + random.nextInt());
 

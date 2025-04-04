@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 public class ClientControl {
     private static Socket tcpSocket;
@@ -16,10 +17,13 @@ public class ClientControl {
     private static int udpPort = 5005;
     private static DataOutputStream out;
     private static DataInputStream in;
-    private static String buzzResponse;
     private static int score;
     private static String[] question;
     private static int next;
+    private static boolean status = true;
+    private static boolean canBuzz = true;
+    private static boolean canAnswer = false;
+    private static GameState gameStateListener;
 
     public ClientControl() {
 
@@ -36,6 +40,11 @@ public class ClientControl {
             System.out.println("Error: " + e.getMessage());
         }
     }
+
+    public static void setGameStateListener(GameState listener){
+        gameStateListener = listener;
+    }
+
     private void gameStart(){
         new Thread(this::tcpListen).start();
         new Thread(this::udpListen).start();
@@ -49,6 +58,10 @@ public class ClientControl {
 
                 switch (packet.getType()) {
                     case GPacket.TYPE_QUESTION:
+                        String received = new String(packet.getData());
+                        String[] q = received.split("::");
+                        setQuestion(q);
+                        setCanBuzz(true);
                         break;
                     case GPacket.TYPE_NEXT:
                         System.out.println("Next: " + next);
@@ -56,7 +69,7 @@ public class ClientControl {
                     case GPacket.TYPE_BUZZ_RES:
                         String res = new String(packet.getData(), StandardCharsets.UTF_8);
                         setBuzz(res);
-                        System.out.println("Buzz Response: " + buzzResponse);
+                        System.out.println("Buzz Response: " + res);
                         break;
                     case GPacket.TYPE_SCORE:
                         System.out.println("Score: " + score);
@@ -112,15 +125,58 @@ public class ClientControl {
     }
 
     private void setBuzz(String res){
-        buzzResponse = res;
+        setCanBuzz(false);
+        if (res.equals("ack")) {
+            System.out.println("Buzz accepted");
+            setCanAnswer(true);
+        } else if (res.equals("neg-ack")) {
+            System.out.println("Buzz rejected");
+            setCanAnswer(false);
+        } else {
+            System.out.println("Unknown response: " + res);
+        }
     }
-    public String getBuzz(){
-        return buzzResponse;
-    }
+
     private void setQuestion(String[] q){
         question = q;
+        if (gameStateListener != null) {
+            gameStateListener.onQuestionReceived(q);
+        }
     }
     public String[] getQuestion(){
+
         return question;
     }
+
+    public static boolean isStatus() {
+        return status;
+    }
+
+    private static void setStatus(boolean status) {
+        ClientControl.status = status;
+    }
+
+    public static boolean isCanBuzz() {
+        return canBuzz;
+    }
+
+    private static void setCanBuzz(boolean res) {
+        canBuzz = res;
+        if (gameStateListener != null) {
+            gameStateListener.onCanBuzzChanged(res);
+        }
+    }
+
+    public static boolean isCanAnswer() {
+        return canAnswer;
+    }
+
+    private static void setCanAnswer(boolean res) {
+        canAnswer = res;
+        if (gameStateListener != null) {
+            gameStateListener.onCanAnswerChanged(res);
+        }
+    }
+
+
 }
