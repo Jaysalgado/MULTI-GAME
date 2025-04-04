@@ -87,7 +87,7 @@ public class Server {
             Question q = questionBank.get(qIndex);
             long questionTimestamp = System.currentTimeMillis();
 
-            udpThread.setCurrentQuestionTimestamp(questionTimestamp);
+            udpThread.setCurrentQuestionIndex(currentQuestionIndex);
 
             System.out.println("\n[GAME] Sending Q" + (qIndex + 1) + ": " + q.getText());
 

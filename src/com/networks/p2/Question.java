@@ -21,6 +21,10 @@ public class Question {
         return Arrays.copyOfRange(questionArray, 1, questionArray.length);
     }
 
+    public int getQuestionNumber() {
+        return Integer.parseInt(questionArray[5]);
+    }
+
     public String toNetworkPayload() {
         return String.join("::", questionArray);
     }
