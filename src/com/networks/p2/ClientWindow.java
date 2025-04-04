@@ -147,9 +147,10 @@ public class ClientWindow implements ActionListener
                 break;
             case "Submit":
                 if (!answer.isEmpty()) {
+                    System.out.println("Submitting answeringggg: " + answer);
                     gameManager.sendAnswer(answer);
                     answer = "";
-                }else
+                } else
                     System.out.println("Please select an option before submitting");
                 break;
             default:

@@ -69,15 +69,16 @@ public class ClientControl {
                         break;
                     case GPacket.TYPE_NEXT:
                         setCanAnswer(false);
-                        System.out.println("Next: " + next);
+                        System.out.println("Next is now: " + next);
                         break;
                     case GPacket.TYPE_BUZZ_RES:
                         String res = new String(packet.getData(), StandardCharsets.UTF_8);
                         setBuzz(res);
                         System.out.println("Buzz Response: " + res);
                         break;
-                    case GPacket.TYPE_SCORE:
-                        System.out.println("Score: " + score);
+                    case GPacket.TYPE_ANSWER_RES:
+                        String answerRes = new String(packet.getData(), StandardCharsets.UTF_8);
+                        System.out.println("Answer Response: " + answerRes);
                         break;
                     default:
                         System.out.println("Unknown message type: " + packet.getType());
