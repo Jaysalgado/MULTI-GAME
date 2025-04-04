@@ -18,7 +18,7 @@ public class Main {
 
             case "client":
                 System.out.println("[Main] Starting client.");
-                ClientWindow.start();
+                ClientWindow window = new ClientWindow();
                 break;
 
             default:
