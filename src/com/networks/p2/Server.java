@@ -115,10 +115,10 @@ public class Server {
             ClientThread buzzer = activeClients.get(buzzerID);
             if (buzzer != null) {
                 if (alreadyProcessed.isEmpty()) {
-                    buzzer.sendACK(true, questionTimestamp);
+                    buzzer.sendBuzzResult(true, questionTimestamp);
                     buzzer.allowAnswer(questionTimestamp);
                 } else {
-                    buzzer.sendACK(false, questionTimestamp);
+                    buzzer.sendBuzzResult(false, questionTimestamp);
                 }
                 alreadyProcessed.add(buzzerID);
             }

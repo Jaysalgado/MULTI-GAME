@@ -2,10 +2,10 @@ package com.networks.p2;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.Timer;
-import java.util.concurrent.BlockingQueue;
 import java.security.SecureRandom;
-
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.BlockingQueue;
 
 public class ClientThread implements Runnable {
     private final Socket clientSocket;
@@ -39,6 +39,7 @@ public class ClientThread implements Runnable {
     private void generateClientID() {
         SecureRandom random = new SecureRandom();
         clientID = (short) random.nextInt(Short.MAX_VALUE + 1);
+        System.out.println("[ClientThread] Assigned ID: " + clientID);
     }
 
     public short getClientID() {
@@ -49,20 +50,13 @@ public class ClientThread implements Runnable {
     public void run() {
         try {
             while (running) {
-                byte[] headerBuffer = new byte[1024];
-                int read = input.read(headerBuffer);
-                if (read == -1) {
-                    System.out.println("[ClientThread " + clientID + "] Client disconnected.");
-                    break;
+                GPacket packet = GPacket.tcpRead(input);
+                if (packet != null) {
+                    handlePacket(packet);
                 }
-
-                GPacket packet = GPacket.convertFromBytes(headerBuffer);
-                if (packet == null) {
-                    continue;
-                }
-
-                handlePacket(packet);
             }
+        } catch (EOFException e) {
+            System.out.println("[ClientThread " + clientID + "] Client disconnected.");
         } catch (IOException e) {
             System.err.println("[ClientThread " + clientID + "] Connection lost: " + e.getMessage());
         } finally {
@@ -86,7 +80,7 @@ public class ClientThread implements Runnable {
 
     public void allowAnswer(long questionTimestamp) {
         allowedToAnswer = true;
-        System.out.println("[ClientThread " + clientID + "] Answering...");
+        System.out.println("[ClientThread " + clientID + "] Allowed to answer...");
 
         answerTimer = new Timer();
         answerTimer.schedule(new TimerTask() {
@@ -95,7 +89,7 @@ public class ClientThread implements Runnable {
                 if (allowedToAnswer) {
                     allowedToAnswer = false;
                     server.getClientScores().merge(clientID, -20, Integer::sum);
-                    System.out.println("[ClientThread " + clientID + "] Too long! -20 points.");
+                    System.out.println("[ClientThread " + clientID + "] Timed out! -20 points.");
                     sendPacket(new GPacket(GPacket.TYPE_ANSWER_RES, clientID, questionTimestamp, "timeout".getBytes()));
                 }
             }
@@ -104,7 +98,7 @@ public class ClientThread implements Runnable {
 
     private void handleAnswer(GPacket packet) {
         if (!allowedToAnswer) {
-            System.out.println("[ClientThread " + clientID + "] unable to answer.");
+            System.out.println("[ClientThread " + clientID + "] Answer ignored: not allowed.");
             return;
         }
 
@@ -116,13 +110,13 @@ public class ClientThread implements Runnable {
         Question current = server.getQuestionBank().get(qIndex);
         boolean correct = current.getCorrectAnswerText().equalsIgnoreCase(answer);
 
-        String response = correct ? "correct" : "wrong";
-        int scoreDelta = correct ? 10 : - 10;
+        String result = correct ? "correct" : "wrong";
+        int scoreDelta = correct ? 10 : -10;
 
         server.getClientScores().merge(clientID, scoreDelta, Integer::sum);
 
-        sendPacket(new GPacket(GPacket.TYPE_ANSWER_RES, clientID, System.currentTimeMillis(), response.getBytes()));
-        System.out.println("[ClientThread " + clientID + "] Answered " + answer + " => " + result);
+        sendPacket(new GPacket(GPacket.TYPE_ANSWER_RES, clientID, System.currentTimeMillis(), result.getBytes()));
+        System.out.println("[ClientThread " + clientID + "] Answered: " + answer + " → " + result);
     }
 
     public void sendPacket(GPacket packet) {
@@ -135,46 +129,19 @@ public class ClientThread implements Runnable {
         }
     }
 
-    public void sendACK(boolean isWinner, long questionTimestamp) {
-        byte type = isWinner ? GPacket.TYPE_ACK : GPacket.TYPE_NEG_ACK;
-        GPacket packet = new GPacket(type, clientID, questionTimestamp, null);
+    public void sendBuzzResult(boolean isWinner, long questionTimestamp) {
+        String result = isWinner ? "ack" : "neg-ack";
+        GPacket packet = new GPacket(GPacket.TYPE_BUZZ_RES, clientID, questionTimestamp, result.getBytes());
         sendPacket(packet);
     }
-
-    public void processBuzzes(long currentQuestionTimestamp) {
-        Set<Short> alreadyNotified = new HashSet<>();
-
-        while (!buzzQueue.isEmpty()) {
-            GPacket buzz = buzzQueue.poll();
-            if (buzz == null) break;
-
-            if (buzz.getTimestamp() != currentQuestionTimestamp) continue;
-
-            short buzzerID = buzz.getNodeID();
-            if (alreadyNotified.contains(buzzerID)) continue;
-
-            ClientThread buzzer = activeClients.get(buzzerID);
-            if (buzzer != null) {
-                if (alreadyNotified.isEmpty()) {
-                    // First buzz
-                    buzzer.sendACK(true, currentQuestionTimestamp);
-                    buzzer.allowAnswer(currentQuestionTimestamp);
-                } else {
-                    buzzer.sendACK(false, currentQuestionTimestamp);
-                }
-                alreadyNotified.add(buzzerID);
-            }
-        }
-    }
-
 
     private void closeConnection() {
         try {
             clientSocket.close();
         } catch (IOException e) {
-            System.err.println("[ClientThread " + clientID + "] Failed to close socket.");
+            System.err.println("[ClientThread " + clientID + "] Error closing socket.");
         }
         server.getActiveClients().remove(clientID);
-        System.out.println("[ClientThread " + clientID + "] Closed.");
+        System.out.println("[ClientThread " + clientID + "] Disconnected.");
     }
 }
