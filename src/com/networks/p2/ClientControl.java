@@ -24,6 +24,7 @@ public class ClientControl {
     private static boolean canBuzz = true;
     private static boolean canAnswer = false;
     private static GameState gameStateListener;
+    private static String qNum ="0";
 
     public ClientControl() {
 
@@ -61,6 +62,7 @@ public class ClientControl {
                     case GPacket.TYPE_QUESTION:
                         String received = new String(packet.getData());
                         String[] q = received.split("::");
+//                        setQNum(q[5]);
                         setQuestion(q);
                         setCanBuzz(true);
                         System.out.println("question received");
@@ -115,8 +117,7 @@ public class ClientControl {
 
     public void buzz() {
         try {
-            String buzz = "Buzz";
-            byte[] data = buzz.getBytes(StandardCharsets.UTF_8);
+            byte[] data = qNum.getBytes(StandardCharsets.UTF_8);
             GPacket prep = new GPacket(GPacket.TYPE_BUZZ, (short) 0, System.currentTimeMillis(), data);
             byte[] packet = prep.convertToBytes();
             sendPacket = new DatagramPacket(packet, packet.length, address, 6666);
@@ -178,6 +179,14 @@ public class ClientControl {
         if (gameStateListener != null) {
             gameStateListener.onCanAnswerChanged(res);
         }
+    }
+
+    private static void setQNum(String n){
+        qNum = n;
+    }
+
+    public static String getQNum() {
+        return qNum;
     }
 
 
