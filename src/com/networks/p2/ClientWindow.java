@@ -34,7 +34,7 @@ public class ClientWindow implements ActionListener
         gameManager = new ClientControl();
 
         window = new JFrame("Trivia");
-        question = new JLabel("Q1. This is a sample question"); // represents the question
+        question = new JLabel("Waiting for the game to begin ..."); // represents the question
         window.add(question);
         question.setBounds(10, 5, 350, 100);;
 
@@ -120,8 +120,6 @@ public class ClientWindow implements ActionListener
 
     }
 
-
-
     // this method is called when you check/uncheck any radio button
     // this method is called when you press either of the buttons- submit/poll
     @Override
@@ -155,7 +153,7 @@ public class ClientWindow implements ActionListener
                     System.out.println("Please select an option before submitting");
                 break;
             default:
-                System.out.println("Incorrect Option");
+                System.out.println("Button error");
         }
 
         // test code below to demo enable/disable components
