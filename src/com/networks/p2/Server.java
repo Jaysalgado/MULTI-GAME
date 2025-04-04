@@ -165,7 +165,19 @@ public class Server {
                 }
 
                 String[] qArray = Arrays.copyOfRange(parts, 0, 5);
-                int correctIndex = Integer.parseInt(parts[5].trim()) - 1; // 1-based to 0-based
+                int correctIndex;
+
+                try {
+                    correctIndex = Integer.parseInt(parts[5].trim());
+
+                    if (correctIndex < 0 || correctIndex > 3) {
+                        continue;
+                    }
+
+                } catch (NumberFormatException e) {
+                    continue;
+                }
+
                 Question q = new Question(qArray, correctIndex);
                 questionBank.add(q);
             }
@@ -175,6 +187,7 @@ public class Server {
             System.err.println("[SERVER] Failed to load questions.txt: " + e.getMessage());
         }
     }
+
 
     public List<Question> getQuestionBank() {
         return questionBank;
