@@ -62,8 +62,8 @@ public class Server {
 
                     new Thread(() -> {
                         try {
-                            System.out.println("[SERVER] Waiting 3 seconds for more players to join...");
-                            Thread.sleep(3_000);
+                            System.out.println("[SERVER] Waiting 5 seconds for more players to join...");
+                            Thread.sleep(5_000);
                             startGameLoop();
                         } catch (InterruptedException e) {
                             System.err.println("[SERVER] Lobby wait interrupted.");
@@ -106,10 +106,10 @@ public class Server {
                 e.printStackTrace();
             }
 
-            processBuzzes(questionTimestamp);
+            processBuzzes(currentQuestionIndex);
 
             try {
-                Thread.sleep(10_000);
+                Thread.sleep(3_000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -124,6 +124,7 @@ public class Server {
     }
 
     private void processBuzzes(long questionTimestamp) {
+        System.out.println("[SERVER] Processing buzzes... queue size before: " + buzzQueue.size());
         Set<Short> alreadyProcessed = new HashSet<>();
 
         while (!buzzQueue.isEmpty()) {

@@ -37,9 +37,10 @@ public class ClientThread implements Runnable {
     }
 
     private void generateClientID() {
-        SecureRandom random = new SecureRandom();
-        clientID = (short) random.nextInt(Short.MAX_VALUE + 1);
-        System.out.println("[ClientThread] Assigned ID: " + clientID);
+        clientID = 0;
+//        SecureRandom random = new SecureRandom();
+//        clientID = (short) random.nextInt(Short.MAX_VALUE + 1);
+//        System.out.println("[ClientThread] Assigned ID: " + clientID);
     }
 
     public short getClientID() {

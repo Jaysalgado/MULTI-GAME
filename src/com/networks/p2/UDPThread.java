@@ -66,7 +66,7 @@ public class UDPThread implements Runnable {
 
                 lastBuzzTimestamps.put(clientID, System.currentTimeMillis());
                 buzzQueue.put(gPacket);
-                System.out.println("[UDPThread] Buzz accepted from client " + clientID);
+                System.out.println("[UDPThread] Buzz accepted from client " + clientID + " (queue size: " + buzzQueue.size() + ")");
             }
         } catch (SocketException e) {
             System.err.println("[UDPThread] Socket closed or unavailable: " + e.getMessage());
