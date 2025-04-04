@@ -12,7 +12,7 @@ public class Question {
         this.options = new String[] {
                 questionArray[1], questionArray[2], questionArray[3], questionArray[4]
         };
-        this.correctIndex = Integer.parseInt(questionArray[5].trim()) - 1;
+        this.correctIndex = correctIndex;
     }
 
     public String getText() {
