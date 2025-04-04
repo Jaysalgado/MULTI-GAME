@@ -63,6 +63,7 @@ public class ClientControl {
                         String[] q = received.split("::");
                         setQuestion(q);
                         setCanBuzz(true);
+                        System.out.println("question received");
                         break;
                     case GPacket.TYPE_NEXT:
                         System.out.println("Next: " + next);
