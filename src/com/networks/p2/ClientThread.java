@@ -110,11 +110,16 @@ public class ClientThread implements Runnable {
         int qIndex = server.getCurrentQuestionIndex();
         Question current = server.getQuestionBank().get(qIndex);
         int correctIndex = server.getCorrectAnswers().getOrDefault(qIndex, -1);
-        String[] options = current.getOptions();
 
-        boolean correct = (correctIndex >= 0 && correctIndex < options.length)
-                && options[correctIndex].equalsIgnoreCase(answer);
+        int selectedIndex;
+        try {
+            selectedIndex = Integer.parseInt(answer);
+        } catch (NumberFormatException e) {
+            System.out.println("[ClientThread " + clientID + "] Invalid answer format: " + answer);
+            return;
+        }
 
+        boolean correct = (correctIndex >= 0 && selectedIndex == correctIndex);
         String result = correct ? "correct" : "wrong";
         int scoreDelta = correct ? 10 : -10;
 
