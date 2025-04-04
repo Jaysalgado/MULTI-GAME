@@ -1,6 +1,7 @@
 package com.networks.p2;
 
-
+// java com.networks.p2.Main server
+// java com.networks.p2.Main client
 
 public class Main {
     public static void main(String[] args) {
