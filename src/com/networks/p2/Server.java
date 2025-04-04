@@ -130,7 +130,18 @@ public class Server {
             GPacket buzz = buzzQueue.poll();
             if (buzz == null) break;
 
-            if (buzz.getTimestamp() != questionTimestamp) continue;
+            String dataStr = new String(buzz.getData()).trim();
+            int questionIndex;
+            try {
+                questionIndex = Integer.parseInt(dataStr);
+            } catch (NumberFormatException e) {
+                System.out.println("[SERVER] Invalid buzz data from client " + buzz.getNodeID() + ": " + dataStr);
+                continue;
+            }
+
+            if (questionIndex != currentQuestionIndex) {
+                continue;
+            }
 
             short buzzerID = buzz.getNodeID();
             if (alreadyProcessed.contains(buzzerID)) continue;
