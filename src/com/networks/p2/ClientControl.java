@@ -62,7 +62,7 @@ public class ClientControl {
                     case GPacket.TYPE_QUESTION:
                         String received = new String(packet.getData());
                         String[] q = received.split("::");
-//                        setQNum(q[5]);
+                        setQNum(q[5]);
                         setQuestion(q);
                         setCanBuzz(true);
                         System.out.println("question received");
