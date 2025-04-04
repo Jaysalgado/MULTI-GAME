@@ -28,10 +28,10 @@ public class ClientControl {
     public ClientControl() {
 
         try {
-            tcpSocket = new Socket("localhost", 12345);
+            tcpSocket = new Socket("localhost", 5555);
             out = new DataOutputStream(tcpSocket.getOutputStream());
             in = new DataInputStream(tcpSocket.getInputStream());
-            System.out.println("Client on port 12345");
+            System.out.println("Client on port 5555");
             receiveSocket = new DatagramSocket(udpPort);
             sendSocket = new DatagramSocket();
             address = InetAddress.getByName("localhost");
@@ -117,7 +117,7 @@ public class ClientControl {
             byte[] data = buzz.getBytes(StandardCharsets.UTF_8);
             GPacket prep = new GPacket(GPacket.TYPE_BUZZ, (short) 0, System.currentTimeMillis(), data);
             byte[] packet = prep.convertToBytes();
-            sendPacket = new DatagramPacket(packet, packet.length, address, udpPort);
+            sendPacket = new DatagramPacket(packet, packet.length, address, 6666);
             sendSocket.send(sendPacket);
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
