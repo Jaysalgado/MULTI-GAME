@@ -26,7 +26,7 @@ public class Server {
     }
 
     public void startServer() {
-        ConfigLoader config = new ConfigLoader("config.txt");
+        ConfigLoader config = new ConfigLoader("src/com/networks/p2/config.txt");
 
         loadQuestions();
 
@@ -153,7 +153,7 @@ public class Server {
 
 
     private void loadQuestions() {
-        try (BufferedReader reader = new BufferedReader(new FileReader("questions.txt"))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader("src/com/networks/p2/questions.txt"))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 if (line.trim().isEmpty()) continue;
