@@ -12,6 +12,8 @@ public class Server {
     private UDPThread udpThread;
     private int TCP_PORT;
     private int UDP_PORT;
+    private boolean gameStarted = false;
+
 
     private final Map<Short, ClientThread> activeClients = new ConcurrentHashMap<>();
     private final Map<Short, Integer> clientScores = new ConcurrentHashMap<>();
@@ -43,15 +45,31 @@ public class Server {
 
             while (true) {
                 Socket clientSocket = serverSocket.accept();
-                System.out.println("[SERVER] New client connected: " + clientSocket.getRemoteSocketAddress());
-
                 ClientThread clientThread = new ClientThread(clientSocket, buzzQueue, this);
                 short clientID = clientThread.getClientID();
 
                 activeClients.put(clientID, clientThread);
                 clientScores.putIfAbsent(clientID, 0);
 
+                System.out.println("[SERVER] Client connected → ID: " + clientID +
+                        " | IP: " + clientSocket.getInetAddress().getHostAddress() +
+                        " | Total clients: " + activeClients.size());
+
                 new Thread(clientThread).start();
+
+                if (!gameStarted) {
+                    gameStarted = true;
+
+                    new Thread(() -> {
+                        try {
+                            System.out.println("[SERVER] Waiting 3 seconds for more players to join...");
+                            Thread.sleep(3_000);
+                            startGameLoop();
+                        } catch (InterruptedException e) {
+                            System.err.println("[SERVER] Lobby wait interrupted.");
+                        }
+                    }).start();
+                }
             }
         } catch (IOException e) {
             System.err.println("[SERVER] Server error: " + e.getMessage());
