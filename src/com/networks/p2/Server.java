@@ -181,7 +181,7 @@ public class Server {
                 if (line.trim().isEmpty()) continue;
 
                 String[] parts = line.split(",");
-                if (parts.length != 5) {
+                if (parts.length != 6) {
                     System.out.println("[SERVER] Skipping malformed line: " + line);
                     continue;
                 }
