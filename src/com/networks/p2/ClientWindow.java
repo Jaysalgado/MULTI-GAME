@@ -49,6 +49,7 @@ public class ClientWindow implements ActionListener
             options[index].setBounds(10, 110+(index*20), 350, 20);
             window.add(options[index]);
             optionGroup.add(options[index]);
+            options[index].setEnabled(false);  // disable the radio buttons until the question is received
         }
 
         timer = new JLabel("TIMER");  // represents the countdown shown on the window
@@ -92,7 +93,15 @@ public class ClientWindow implements ActionListener
 
             @Override
             public void onCanAnswerChanged(boolean canAnswer) {
-                SwingUtilities.invokeLater(() -> submit.setEnabled(canAnswer));
+                SwingUtilities.invokeLater(() -> {
+
+                    submit.setEnabled(canAnswer);
+
+                    for (JRadioButton option : options) {
+                        option.setEnabled(true);
+                    }
+
+                });
             }
 
             @Override
@@ -103,7 +112,6 @@ public class ClientWindow implements ActionListener
                     int  i = 1;
                     for (JRadioButton option : options) {
                         option.setText(q[i]);
-                        option.setEnabled(true);
                         i++;
                     }
                 });
