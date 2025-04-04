@@ -29,6 +29,9 @@ public class Server {
     public void startServer() {
         ConfigLoader config = new ConfigLoader("src/com/networks/p2/config.txt");
 
+        TCP_PORT = config.getInt("TCP_PORT", 5555);
+        UDP_PORT = config.getInt("UDP_PORT", 6666);
+
         loadQuestions();
 
         udpThread = new UDPThread(UDP_PORT, buzzQueue);
