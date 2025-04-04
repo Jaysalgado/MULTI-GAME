@@ -68,6 +68,7 @@ public class ClientControl {
                         System.out.println("question received " + q[5]);
                         break;
                     case GPacket.TYPE_NEXT:
+                        setCanAnswer(false);
                         System.out.println("Next: " + next);
                         break;
                     case GPacket.TYPE_BUZZ_RES:

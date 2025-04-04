@@ -98,7 +98,7 @@ public class ClientWindow implements ActionListener
                     submit.setEnabled(canAnswer);
 
                     for (JRadioButton option : options) {
-                        option.setEnabled(true);
+                        option.setEnabled(canAnswer);
                     }
 
                 });
