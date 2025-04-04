@@ -69,8 +69,9 @@ public class Server {
 
             System.out.println("\n[GAME] Sending Q" + (qIndex + 1) + ": " + q.getText());
 
-            String qText = q.toNetworkString();
-            GPacket questionPacket = new GPacket(GPacket.TYPE_QUESTION, (short) 0, questionTimestamp, qText.getBytes());
+            String[] qArray = q.getQuestionArray();
+            String joined = String.join("::", qArray);
+            GPacket questionPacket = new GPacket(GPacket.TYPE_QUESTION, (short) 0, questionTimestamp, joined.getBytes());
 
             for (ClientThread client : activeClients.values()) {
                 client.sendPacket(questionPacket);
