@@ -13,16 +13,16 @@ public class UDPThread implements Runnable {
     private boolean running = true;
 
     private final Map<Short, Long> lastBuzzTimestamps = new ConcurrentHashMap<>();
-    private volatile long currentQuestionTimestamp = -1;
+    private volatile int currentQuestionIndex = -1;
 
     public UDPThread(int udpPort, BlockingQueue<GPacket> buzzQueue) {
         this.udpPort = udpPort;
         this.buzzQueue = buzzQueue;
     }
 
-    public void setCurrentQuestionTimestamp(long timestamp) {
-        this.currentQuestionTimestamp = timestamp;
-        lastBuzzTimestamps.clear(); // Reset per new question
+    public void setCurrentQuestionIndex(int index) {
+        this.currentQuestionIndex = index;
+        lastBuzzTimestamps.clear();
     }
 
     @Override
@@ -44,10 +44,18 @@ public class UDPThread implements Runnable {
                 }
 
                 short clientID = gPacket.getNodeID();
-                long buzzTimestamp = gPacket.getTimestamp();
+                String dataString = new String(gPacket.getData()).trim();
+                int questionIndex = -1;
 
-                if (buzzTimestamp != currentQuestionTimestamp) {
-                    System.out.println("[UDPThread] Ignored buzz from client " + clientID + " (old timestamp)");
+                try {
+                    questionIndex = Integer.parseInt(dataString);
+                } catch (NumberFormatException e) {
+                    System.out.println("[UDPThread] Invalid buzz data from client " + clientID + ": " + dataString);
+                    continue;
+                }
+
+                if (questionIndex != currentQuestionIndex) {
+                    System.out.println("[UDPThread] Buzz for wrong question. Client " + clientID + " sent: " + questionIndex + ", expected: " + currentQuestionIndex);
                     continue;
                 }
 
@@ -56,7 +64,7 @@ public class UDPThread implements Runnable {
                     continue;
                 }
 
-                lastBuzzTimestamps.put(clientID, buzzTimestamp);
+                lastBuzzTimestamps.put(clientID, System.currentTimeMillis());
                 buzzQueue.put(gPacket);
                 System.out.println("[UDPThread] Buzz accepted from client " + clientID);
             }

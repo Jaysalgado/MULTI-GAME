@@ -87,7 +87,7 @@ public class Server {
             Question q = questionBank.get(qIndex);
             long questionTimestamp = System.currentTimeMillis();
 
-            udpThread.setCurrentQuestionTimestamp(questionTimestamp);
+            udpThread.setCurrentQuestionIndex(currentQuestionIndex);
 
             System.out.println("\n[GAME] Sending Q" + (qIndex + 1) + ": " + q.getText());
 
@@ -181,7 +181,7 @@ public class Server {
                 if (line.trim().isEmpty()) continue;
 
                 String[] parts = line.split(",");
-                if (parts.length != 5) {
+                if (parts.length != 6) {
                     System.out.println("[SERVER] Skipping malformed line: " + line);
                     continue;
                 }
