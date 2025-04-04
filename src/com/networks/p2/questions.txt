@@ -1,1 +1,1 @@
-Who won the Super Bowl?,Chiefs,Eagles,Cowboys,Packers,2
+Who won the Super Bowl?,Chiefs,Eagles,Cowboys,Packers

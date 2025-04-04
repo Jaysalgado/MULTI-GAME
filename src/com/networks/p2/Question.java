@@ -1,51 +1,33 @@
 package com.networks.p2;
 
+import java.util.Arrays;
+
 public class Question {
     private final String[] questionArray;
-    private final String text;
-    private final String[] options;
-    private final int correctIndex;
 
-    public Question(String[] questionArray, int correctIndex) {
+    public Question(String[] questionArray) {
         this.questionArray = questionArray;
-        this.text = questionArray[0];
-        this.options = new String[] {
-                questionArray[1], questionArray[2], questionArray[3], questionArray[4]
-        };
-        this.correctIndex = correctIndex;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public String[] getOptions() {
-        return options;
-    }
-
-    public int getCorrectIndex() {
-        return correctIndex;
-    }
-
-    public String getCorrectAnswerText() {
-        return options[correctIndex];
     }
 
     public String[] getQuestionArray() {
         return questionArray;
     }
 
-    public String toNetworkString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(text).append("\n");
-        for (int i = 0; i < options.length; i++) {
-            sb.append((char) ('A' + i)).append(". ").append(options[i]).append("\n");
-        }
-        return sb.toString().trim();
+    public String getText() {
+        return questionArray[0];
     }
 
-    @Override
-    public String toString() {
-        return "Q: " + text + " (Answer: " + getCorrectAnswerText() + ")";
+    public String[] getOptions() {
+        return Arrays.copyOfRange(questionArray, 1, questionArray.length);
+    }
+
+    public String toNetworkPayload() {
+        return String.join("::", questionArray);
+    }
+
+    public static Question fromNetworkPayload(String payload) {
+        String[] parts = payload.split("::");
+        return new Question(parts);
     }
 }
+

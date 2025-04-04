@@ -108,7 +108,11 @@ public class ClientThread implements Runnable {
         String answer = new String(packet.getData()).trim();
         int qIndex = server.getCurrentQuestionIndex();
         Question current = server.getQuestionBank().get(qIndex);
-        boolean correct = current.getCorrectAnswerText().equalsIgnoreCase(answer);
+        int correctIndex = server.getCorrectAnswers().getOrDefault(qIndex, -1);
+        String[] options = current.getOptions();
+
+        boolean correct = (correctIndex >= 0 && correctIndex < options.length)
+                && options[correctIndex].equalsIgnoreCase(answer);
 
         String result = correct ? "correct" : "wrong";
         int scoreDelta = correct ? 10 : -10;
@@ -118,6 +122,7 @@ public class ClientThread implements Runnable {
         sendPacket(new GPacket(GPacket.TYPE_ANSWER_RES, clientID, System.currentTimeMillis(), result.getBytes()));
         System.out.println("[ClientThread " + clientID + "] Answered: " + answer + " → " + result);
     }
+
 
     public void sendPacket(GPacket packet) {
         try {
