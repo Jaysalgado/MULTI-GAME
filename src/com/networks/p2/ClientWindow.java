@@ -18,6 +18,7 @@ public class ClientWindow implements ActionListener
     private JLabel timer;
     private JLabel score;
     private TimerTask clock;
+    private String answer = "";
 
     private JFrame window;
 
@@ -118,23 +119,31 @@ public class ClientWindow implements ActionListener
     public void actionPerformed(ActionEvent e)
     {
         System.out.println("You clicked " + e.getActionCommand());
-
         // input refers to the radio button you selected or button you clicked
         String input = e.getActionCommand();
         switch(input)
         {
-            case "Option 1":	// Your code here
+            case "Option 1":
+                answer = "1";
                 break;
-            case "Option 2":	// Your code here
+            case "Option 2":
+                answer = "2";
                 break;
-            case "Option 3":	// Your code here
+            case "Option 3":
+                answer = "3";
                 break;
-            case "Option 4":	// Your code here
+            case "Option 4":
+                answer = "4";
                 break;
             case "Poll":
                 gameManager.buzz();
                 break;
-            case "Submit":		// Your code here
+            case "Submit":
+                if (!answer.isEmpty()) {
+                    gameManager.sendAnswer(answer);
+                    answer = "";
+                }else
+                    System.out.println("Please select an option before submitting");
                 break;
             default:
                 System.out.println("Incorrect Option");
