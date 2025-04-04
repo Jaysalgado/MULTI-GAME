@@ -38,6 +38,7 @@ public class ClientControl {
             gameStart();
         } catch (IOException e) {
             System.out.println("Error: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
