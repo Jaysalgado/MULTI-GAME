@@ -131,16 +131,16 @@ public class ClientWindow implements ActionListener
         switch(input)
         {
             case "Option 1":
-                answer = "1";
+                answer = "0";
                 break;
             case "Option 2":
-                answer = "2";
+                answer = "1";
                 break;
             case "Option 3":
-                answer = "3";
+                answer = "2";
                 break;
             case "Option 4":
-                answer = "4";
+                answer = "3";
                 break;
             case "Poll":
                 gameManager.buzz();

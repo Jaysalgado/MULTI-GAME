@@ -35,6 +35,7 @@ public class Server {
         UDP_PORT = config.getInt("UDP_PORT", 6666);
 
         loadQuestions();
+        loadAnswers();
 
         udpThread = new UDPThread(UDP_PORT, buzzQueue);
         new Thread(udpThread).start();
@@ -185,7 +186,6 @@ public class Server {
         }
     }
 
-
     private void loadQuestions() {
         try (BufferedReader reader = new BufferedReader(new FileReader("src/com/networks/p2/questions.txt"))) {
             String line;
@@ -205,6 +205,29 @@ public class Server {
             System.out.println("[SERVER] Loaded " + questionBank.size() + " questions.");
         } catch (IOException e) {
             System.err.println("[SERVER] Failed to load questions.txt: " + e.getMessage());
+        }
+    }
+
+    private void loadAnswers() {
+        try (BufferedReader reader = new BufferedReader(new FileReader("src/com/networks/p2/answers.txt"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.trim().isEmpty()) continue;
+
+                String[] parts = line.split(",");
+                if (parts.length != 2) {
+                    System.out.println("[SERVER] Skipping malformed answer line: " + line);
+                    continue;
+                }
+
+                int questionNum = Integer.parseInt(parts[0].trim());
+                int correctIndex = Integer.parseInt(parts[1].trim());
+
+                correctAnswers.put(questionNum, correctIndex);
+            }
+        } catch (IOException e) {
+            System.err.println("[SERVER] Failed to load answers.txt: " + e.getMessage());
+        } catch (NumberFormatException e) {
         }
     }
 

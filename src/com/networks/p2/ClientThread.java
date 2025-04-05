@@ -116,11 +116,11 @@ public class ClientThread implements Runnable {
             selectedIndex = Integer.parseInt(answer);
         } catch (NumberFormatException e) {
             System.out.println("[ClientThread " + clientID + "] Invalid answer format: " + answer);
-            return;
+            selectedIndex = -1;
         }
 
         boolean correct = (correctIndex >= 0 && selectedIndex == correctIndex);
-        String result = correct ? "correct" : "wrong";
+        String result = correct ? "correct" : "incorrect";
         int scoreDelta = correct ? 10 : -10;
 
         server.getClientScores().merge(clientID, scoreDelta, Integer::sum);
