@@ -14,7 +14,6 @@ public class Server {
     private int UDP_PORT;
     private boolean gameStarted = false;
 
-
     private final Map<Short, ClientThread> activeClients = new ConcurrentHashMap<>();
     private final Map<Short, Integer> clientScores = new ConcurrentHashMap<>();
     private final BlockingQueue<GPacket> buzzQueue = new LinkedBlockingQueue<>();
@@ -101,18 +100,22 @@ public class Server {
             }
 
             System.out.println("[GAME] Buzz phase started...");
+
             try {
                 Thread.sleep(15_000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
-            processBuzzes(currentQuestionIndex);
+            boolean someoneBuzzed = processBuzzes(currentQuestionIndex);
 
-            try {
-                Thread.sleep(3_000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            if (someoneBuzzed) {
+                System.out.println("[GAME] Waiting 10 seconds for answer...");
+                try {
+                    Thread.sleep(10_000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
 
             GPacket nextPacket = new GPacket(GPacket.TYPE_NEXT, (short) 0, questionTimestamp, null);
@@ -124,9 +127,10 @@ public class Server {
         endGame();
     }
 
-    private void processBuzzes(long questionTimestamp) {
+    private boolean processBuzzes(long questionTimestamp) {
         System.out.println("[SERVER] Processing buzzes... queue size before: " + buzzQueue.size());
         Set<Short> alreadyProcessed = new HashSet<>();
+        boolean someoneBuzzed = false;
 
         while (!buzzQueue.isEmpty()) {
             GPacket buzz = buzzQueue.poll();
@@ -141,9 +145,7 @@ public class Server {
                 continue;
             }
 
-            if (questionIndex != currentQuestionIndex) {
-                continue;
-            }
+            if (questionIndex != currentQuestionIndex) continue;
 
             short buzzerID = buzz.getNodeID();
             if (alreadyProcessed.contains(buzzerID)) continue;
@@ -153,6 +155,7 @@ public class Server {
                 if (alreadyProcessed.isEmpty()) {
                     buzzer.sendBuzzResult(true, questionTimestamp);
                     buzzer.allowAnswer(questionTimestamp);
+                    someoneBuzzed = true;
                 } else {
                     buzzer.sendBuzzResult(false, questionTimestamp);
                 }
@@ -160,9 +163,11 @@ public class Server {
             }
         }
 
-        if (alreadyProcessed.isEmpty()) {
+        if (!someoneBuzzed) {
             System.out.println("[GAME] No one buzzed in.");
         }
+
+        return someoneBuzzed;
     }
 
     private void endGame() {

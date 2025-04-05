@@ -25,8 +25,10 @@ public class ClientControl {
     private static boolean canAnswer = false;
     private static GameState gameStateListener;
     private static String qNum ="0";
+    private static ClientWindow window;
 
-    public ClientControl() {
+    public ClientControl(ClientWindow w) {
+        window = w;
 
         try {
             tcpSocket = new Socket("localhost", 5555);
@@ -66,6 +68,7 @@ public class ClientControl {
                         setQuestion(q);
                         setCanBuzz(true);
                         System.out.println("question received " + q[5]);
+                        window.startPhaseTimer(15, "Buzz");
                         break;
                     case GPacket.TYPE_NEXT:
                         setCanAnswer(false);
@@ -75,6 +78,9 @@ public class ClientControl {
                         String res = new String(packet.getData(), StandardCharsets.UTF_8);
                         setBuzz(res);
                         System.out.println("Buzz Response: " + res);
+                        if (res.equals("ack")) {
+                            window.startPhaseTimer(10, "Answer");
+                        }
                         break;
                     case GPacket.TYPE_ANSWER_RES:
                         String answerRes = new String(packet.getData(), StandardCharsets.UTF_8);

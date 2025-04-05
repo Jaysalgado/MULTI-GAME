@@ -31,7 +31,7 @@ public class ClientWindow implements ActionListener
     public ClientWindow()
     {
 //        JOptionPane.showMessageDialog(window, "This is a trivia game");
-        gameManager = new ClientControl();
+        gameManager = new ClientControl(this);
 
         window = new JFrame("Trivia");
         question = new JLabel("Waiting for the game to begin ..."); // represents the question
@@ -208,6 +208,38 @@ public class ClientWindow implements ActionListener
             duration--;
             window.repaint();
         }
+    }
+
+    public void startPhaseTimer(int duration, String phaseName) {
+        if (clock != null) {
+            clock.cancel();
+        }
+
+        clock = new TimerTask() {
+            int timeLeft = duration;
+
+            @Override
+            public void run() {
+                SwingUtilities.invokeLater(() -> {
+                    if (timeLeft < 0) {
+                        timer.setText(phaseName + " phase ended.");
+                        poll.setEnabled(false);
+                        submit.setEnabled(false);
+                        for (JRadioButton option : options) option.setEnabled(false);
+                        this.cancel();
+                        return;
+                    }
+
+                    timer.setText(phaseName + ": " + timeLeft + "s");
+                    timer.setForeground(timeLeft < 6 ? Color.RED : Color.BLACK);
+                    window.repaint();
+                    timeLeft--;
+                });
+            }
+        };
+
+        Timer t = new Timer();
+        t.schedule(clock, 0, 1000);
     }
 
 }
