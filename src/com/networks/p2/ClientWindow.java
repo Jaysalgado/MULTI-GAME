@@ -31,7 +31,7 @@ public class ClientWindow implements ActionListener
     public ClientWindow()
     {
 //        JOptionPane.showMessageDialog(window, "This is a trivia game");
-        gameManager = new ClientControl(this);
+        gameManager = new ClientControl();
 
         window = new JFrame("Trivia");
         question = new JLabel("Waiting for the game to begin ..."); // represents the question
@@ -59,8 +59,8 @@ public class ClientWindow implements ActionListener
         t.schedule(clock, 0, 1000); // clock is called every second
         window.add(timer);
 
-
-        score = new JLabel("SCORE"); // represents the score
+        score = new JLabel("SCORE: " + ClientControl.getScore());
+// represents the score
         score.setBounds(50, 250, 100, 20);
         window.add(score);
 
@@ -100,6 +100,9 @@ public class ClientWindow implements ActionListener
                     for (JRadioButton option : options) {
                         option.setEnabled(canAnswer);
                     }
+                    if (canAnswer) {
+                        startPhaseTimer(10, "Answer");
+                    }
 
                 });
             }
@@ -107,6 +110,7 @@ public class ClientWindow implements ActionListener
             @Override
             public void onQuestionReceived (String[] q) {
                 SwingUtilities.invokeLater(() -> {
+                    score.setText("SCORE: " + ClientControl.getScore());
                     question.setText(q[0]);
                     optionGroup.clearSelection();
                     int  i = 1;
@@ -114,6 +118,7 @@ public class ClientWindow implements ActionListener
                         option.setText(q[i]);
                         i++;
                     }
+                    startPhaseTimer(15, "Buzz");
                 });
             }
         });

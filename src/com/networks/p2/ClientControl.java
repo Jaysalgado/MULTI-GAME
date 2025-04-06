@@ -17,7 +17,7 @@ public class ClientControl {
     private static int udpPort = 5005;
     private static DataOutputStream out;
     private static DataInputStream in;
-    private static int score;
+    private static int score = 0;
     private static String[] question;
     private static int next;
     private static boolean status = true;
@@ -25,10 +25,10 @@ public class ClientControl {
     private static boolean canAnswer = false;
     private static GameState gameStateListener;
     private static String qNum ="0";
-    private static ClientWindow window;
+    private static boolean answered = false;
 
-    public ClientControl(ClientWindow w) {
-        window = w;
+    public ClientControl() {
+
 
         try {
             tcpSocket = new Socket("localhost", 5555);
@@ -68,7 +68,6 @@ public class ClientControl {
                         setQuestion(q);
                         setCanBuzz(true);
                         System.out.println("question received " + q[5]);
-                        window.startPhaseTimer(15, "Buzz");
                         break;
                     case GPacket.TYPE_NEXT:
                         setCanAnswer(false);
@@ -78,13 +77,11 @@ public class ClientControl {
                         String res = new String(packet.getData(), StandardCharsets.UTF_8);
                         setBuzz(res);
                         System.out.println("Buzz Response: " + res);
-                        if (res.equals("ack")) {
-                            window.startPhaseTimer(10, "Answer");
-                        }
                         break;
                     case GPacket.TYPE_ANSWER_RES:
                         String answerRes = new String(packet.getData(), StandardCharsets.UTF_8);
                         System.out.println("Answer Response: " + answerRes);
+                        setScore(answerRes);
                         break;
                     default:
                         System.out.println("Unknown message type: " + packet.getType());
@@ -99,11 +96,13 @@ public class ClientControl {
 
     public void sendAnswer(String a){
         try {
+            setCanAnswer(false);
             byte[] data = a.getBytes(StandardCharsets.UTF_8);
             GPacket prep = new GPacket(GPacket.TYPE_ANSWER, (short) 0, System.currentTimeMillis(), data);
             byte[] packet = prep.convertToBytes();
             out.write(packet);
             out.flush();
+            answered = true;
         }  catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -195,6 +194,21 @@ public class ClientControl {
 
     public static String getQNum() {
         return qNum;
+    }
+
+    private static void setScore(String s) {
+
+        if (s.equals("correct")) {
+            score += 10;
+        } else if (s.equals("incorrect")) {
+            score -= 10;
+        } else if (s.equals("timeout")) {
+            score -= 20;
+        }
+    }
+
+    public static int getScore() {
+        return score;
     }
 
 
