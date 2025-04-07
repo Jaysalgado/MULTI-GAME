@@ -34,7 +34,7 @@ public class ClientControl {
             tcpSocket = new Socket("localhost", 5555);
             out = new DataOutputStream(tcpSocket.getOutputStream());
             in = new DataInputStream(tcpSocket.getInputStream());
-            System.out.println("Client on port 5555");
+//            System.out.println("Client on port 5555");
             receiveSocket = new DatagramSocket(udpPort);
             sendSocket = new DatagramSocket();
             address = InetAddress.getByName("localhost");
@@ -67,21 +67,20 @@ public class ClientControl {
                         setQNum(q[5]);
                         setQuestion(q);
                         setCanBuzz(true);
-                        System.out.println("question received " + q[5]);
                         break;
                     case GPacket.TYPE_NEXT:
                         setCanAnswer(false);
-                        System.out.println("Next is now: " + next);
                         break;
                     case GPacket.TYPE_BUZZ_RES:
                         String res = new String(packet.getData(), StandardCharsets.UTF_8);
                         setBuzz(res);
-                        System.out.println("Buzz Response: " + res);
                         break;
                     case GPacket.TYPE_ANSWER_RES:
                         String answerRes = new String(packet.getData(), StandardCharsets.UTF_8);
-                        System.out.println("Answer Response: " + answerRes);
                         setScore(answerRes);
+                        break;
+                    case GPacket.TYPE_SCORE:
+                        System.out.println("SCORES IN, GAME OVER");
                         break;
                     case GPacket.TYPE_KILL:
                         System.out.println("KILL SHOT");
@@ -118,7 +117,6 @@ public class ClientControl {
                 receivePacket = new DatagramPacket(buffer, buffer.length);
                 receiveSocket.receive(receivePacket);
                 GPacket gPacket = GPacket.convertFromBytes(receivePacket.getData());
-                System.out.println("Received UDP packet: " + gPacket);
             } catch (IOException e) {
                 System.out.println("Error: " + e.getMessage());
             }
@@ -140,10 +138,8 @@ public class ClientControl {
     private void setBuzz(String res){
         setCanBuzz(false);
         if (res.equals("ack")) {
-            System.out.println("Buzz accepted");
             setCanAnswer(true);
         } else if (res.equals("neg-ack")) {
-            System.out.println("Buzz rejected");
             setCanAnswer(false);
         } else {
             System.out.println("Unknown response: " + res);

@@ -132,7 +132,7 @@ public class ClientWindow implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e)
     {
-        System.out.println("You clicked " + e.getActionCommand());
+//        System.out.println("You clicked " + e.getActionCommand());
         // input refers to the radio button you selected or button you clicked
         String input = e.getActionCommand();
         switch(input)
@@ -154,7 +154,6 @@ public class ClientWindow implements ActionListener
                 break;
             case "Submit":
                 if (!answer.isEmpty()) {
-                    System.out.println("Submitting answeringggg: " + answer);
                     gameManager.sendAnswer(answer);
                     answer = "";
                 } else
