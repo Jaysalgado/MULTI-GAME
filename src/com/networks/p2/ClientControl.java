@@ -83,6 +83,9 @@ public class ClientControl {
                         System.out.println("Answer Response: " + answerRes);
                         setScore(answerRes);
                         break;
+                    case GPacket.TYPE_KILL:
+                        System.out.println("KILL SHOT");
+                        break;
                     default:
                         System.out.println("Unknown message type: " + packet.getType());
                 }

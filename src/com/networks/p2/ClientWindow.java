@@ -36,6 +36,8 @@ public class ClientWindow implements ActionListener
         window = new JFrame("Trivia");
         question = new JLabel("Waiting for the game to begin ..."); // represents the question
         window.add(question);
+        question.setHorizontalAlignment(SwingConstants.CENTER);
+
         question.setBounds(10, 5, 350, 100);;
 
         options = new JRadioButton[4];
