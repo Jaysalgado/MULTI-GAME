@@ -197,12 +197,10 @@ public class ClientControl {
 
     private static void setScore(String s) {
 
-        if (s.equals("correct")) {
-            score += 10;
-        } else if (s.equals("incorrect")) {
-            score -= 10;
-        } else if (s.equals("timeout")) {
-            score -= 20;
+        switch (s) {
+            case "correct" -> score += 10;
+            case "incorrect" -> score -= 10;
+            case "timeout" -> score -= 20;
         }
     }
 

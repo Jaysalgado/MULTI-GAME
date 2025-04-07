@@ -1,6 +1,6 @@
 package com.networks.p2;
 
-import java.awt.Color;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.security.SecureRandom;
@@ -14,9 +14,11 @@ public class ClientWindow implements ActionListener
     private JButton submit;
     private JRadioButton options[];
     private ButtonGroup optionGroup;
-    private JLabel question;
+    private JTextArea question;
     private JLabel timer;
     private JLabel score;
+    private JLabel feedbackLabel;
+
     private TimerTask clock;
     private String answer = "";
 
@@ -34,56 +36,112 @@ public class ClientWindow implements ActionListener
         gameManager = new ClientControl();
 
         window = new JFrame("Trivia");
-        question = new JLabel("Waiting for the game to begin ..."); // represents the question
-        window.add(question);
-        question.setHorizontalAlignment(SwingConstants.CENTER);
+        window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        window.setSize(500, 500);
+        window.setLocationRelativeTo(null);
+        window.setResizable(false);
 
-        question.setBounds(10, 5, 350, 100);;
+        // Main container
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        mainPanel.setBackground(new Color(14, 52, 160));
 
+        // Question
+        question = new JTextArea("Waiting for the game to begin...");
+        question.setLineWrap(true);
+        question.setWrapStyleWord(true);
+        question.setEditable(false);
+        question.setOpaque(false); // transparent, like a label
+        question.setForeground(Color.WHITE);
+        question.setFont(new Font("Arial", Font.BOLD, 18));
+        question.setFocusable(false); // no cursor when clicked
+        question.setMaximumSize(new Dimension(450, 80));
+        question.setPreferredSize(new Dimension(450, 80));
+
+// Wrap question in a panel to center it
+        JPanel questionPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        questionPanel.setBackground(mainPanel.getBackground());
+        questionPanel.add(question);
+
+// Add to main panel
+        mainPanel.add(questionPanel);
+        mainPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+
+
+        // Options
+        JPanel optionsPanel = new JPanel();
+        optionsPanel.setLayout(new GridLayout(4, 1, 10, 10));
+        optionsPanel.setBackground(mainPanel.getBackground());
         options = new JRadioButton[4];
         optionGroup = new ButtonGroup();
-        for(int index=0; index<options.length; index++)
-        {
-            options[index] = new JRadioButton("Option " + (index+1));  // represents an option
-            options[index].setActionCommand("Option " + (index + 1));
-            // if a radio button is clicked, the event would be thrown to this class to handle
-            options[index].addActionListener(this);
-            options[index].setBounds(10, 110+(index*20), 350, 20);
-            window.add(options[index]);
-            optionGroup.add(options[index]);
-            options[index].setEnabled(false);  // disable the radio buttons until the question is received
+
+        for (int i = 0; i < options.length; i++) {
+            options[i] = new JRadioButton("Option " + (i + 1));
+            options[i].setActionCommand("Option " + (i + 1));
+            options[i].addActionListener(this);
+            options[i].setEnabled(false);
+            options[i].setFont(new Font("Arial", Font.PLAIN, 14));
+            options[i].setBackground(mainPanel.getBackground());
+            options[i].setForeground(Color.LIGHT_GRAY);
+            optionGroup.add(options[i]);
+            optionsPanel.add(options[i]);
         }
 
-        timer = new JLabel("TIMER");  // represents the countdown shown on the window
-        timer.setBounds(250, 250, 100, 20);
-        clock = new TimerCode(30);  // represents clocked task that should run after X seconds
-        Timer t = new Timer();  // event generator
-        t.schedule(clock, 0, 1000); // clock is called every second
-        window.add(timer);
+        mainPanel.add(optionsPanel);
+        mainPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+
+        // Timer and Score Panel
+        JPanel infoPanel = new JPanel(new BorderLayout());
+        infoPanel.setBackground(mainPanel.getBackground());
 
         score = new JLabel("SCORE: " + ClientControl.getScore());
-// represents the score
-        score.setBounds(50, 250, 100, 20);
-        window.add(score);
+        score.setForeground(Color.GREEN);
+        score.setFont(new Font("Arial", Font.BOLD, 14));
+        infoPanel.add(score, BorderLayout.WEST);
 
-        poll = new JButton("Poll");  // button that use clicks/ like a buzzer
-        poll.setBounds(10, 300, 100, 20);
-        poll.addActionListener(this);  // calls actionPerformed of this class
-        window.add(poll);
+        timer = new JLabel("TIMER: 30s");
+        timer.setForeground(Color.RED);
+        timer.setFont(new Font("Arial", Font.BOLD, 14));
+        infoPanel.add(timer, BorderLayout.EAST);
 
-        submit = new JButton("Submit");  // button to submit their answer
-        submit.setBounds(200, 300, 100, 20);
-        submit.addActionListener(this);  // calls actionPerformed of this class
-        window.add(submit);
+        mainPanel.add(infoPanel);
+        mainPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+
+        feedbackLabel = new JLabel(""); // start empty
+        feedbackLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        feedbackLabel.setForeground(Color.YELLOW);
+        feedbackLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        feedbackLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        feedbackLabel.setMaximumSize(new Dimension(400, 30));
+        mainPanel.add(feedbackLabel);
+        mainPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+
+        // Buttons
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setBackground(mainPanel.getBackground());
+
+        poll = new JButton("Buzz");
+        poll.setFont(new Font("Arial", Font.BOLD, 18)); // Larger text
+        poll.setPreferredSize(new Dimension(200, 50));  // Wider and taller
+        poll.addActionListener(this);
+        poll.setBackground(Color.RED);
+        poll.setEnabled(false);
+        buttonPanel.add(poll);
+
+        submit = new JButton("Submit");
+        submit.setFont(new Font("Arial", Font.BOLD, 18));
+        submit.setPreferredSize(new Dimension(200, 50));
+        submit.addActionListener(this);
         submit.setEnabled(false);
+        buttonPanel.add(submit);
+
+        mainPanel.add(buttonPanel);
 
 
-        window.setSize(400,400);
-        window.setBounds(50, 50, 400, 400);
-        window.setLayout(null);
+        window.add(mainPanel);
         window.setVisible(true);
-        window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        window.setResizable(false);
+
 
         ClientControl.setGameStateListener(new GameState() {
             @Override
@@ -103,7 +161,7 @@ public class ClientWindow implements ActionListener
                         option.setEnabled(canAnswer);
                     }
                     if (canAnswer) {
-                        startPhaseTimer(10, "Answer");
+                        startPhaseTimer(10, "ANSWER");
                     }
 
                 });
@@ -120,7 +178,7 @@ public class ClientWindow implements ActionListener
                         option.setText(q[i]);
                         i++;
                     }
-                    startPhaseTimer(15, "Buzz");
+                    startPhaseTimer(15, "BUZZ");
                 });
             }
         });
@@ -149,7 +207,7 @@ public class ClientWindow implements ActionListener
             case "Option 4":
                 answer = "3";
                 break;
-            case "Poll":
+            case "Buzz":
                 gameManager.buzz();
                 break;
             case "Submit":
@@ -185,37 +243,6 @@ public class ClientWindow implements ActionListener
 
     }
 
-    // this class is responsible for running the timer on the window
-    public class TimerCode extends TimerTask
-    {
-        private int duration;  // write setters and getters as you need
-        public TimerCode(int duration)
-        {
-            this.duration = duration;
-        }
-        @Override
-        public void run()
-        {
-            if(duration < 0)
-            {
-                timer.setText("Timer expired");
-                window.repaint();
-                this.cancel();  // cancel the timed task
-                return;
-                // you can enable/disable your buttons for poll/submit here as needed
-            }
-
-            if(duration < 6)
-                timer.setForeground(Color.red);
-            else
-                timer.setForeground(Color.black);
-
-            timer.setText(duration+"");
-            duration--;
-            window.repaint();
-        }
-    }
-
     public void startPhaseTimer(int duration, String phaseName) {
         if (clock != null) {
             clock.cancel();
@@ -237,7 +264,8 @@ public class ClientWindow implements ActionListener
                     }
 
                     timer.setText(phaseName + ": " + timeLeft + "s");
-                    timer.setForeground(timeLeft < 6 ? Color.RED : Color.BLACK);
+                    timer.setFont(new Font("Arial", Font.BOLD, 14));
+                    timer.setForeground(timeLeft < 6 ? Color.RED : Color.GREEN);
                     window.repaint();
                     timeLeft--;
                 });
