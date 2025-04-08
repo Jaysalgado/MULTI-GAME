@@ -35,14 +35,13 @@ public class ClientControl {
 
         try {
             setServer();
-            setClientID();
             tcpSocket = new Socket(serverIP, 5555);
             out = new DataOutputStream(tcpSocket.getOutputStream());
             in = new DataInputStream(tcpSocket.getInputStream());
-//            System.out.println("Client on port 5555");
             receiveSocket = new DatagramSocket(udpPort);
             sendSocket = new DatagramSocket();
             address = InetAddress.getByName("localhost");
+            setClientID();
             gameStart();
         } catch (IOException e) {
             System.out.println("Error: " + e.getMessage());
@@ -243,36 +242,8 @@ public class ClientControl {
     }
 
     private static void setClientID() {
-        String localIP = null;
 
-        // Step 1: Get non-loopback, non-link-local IPv4 address
-        try {
-            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-            while (interfaces.hasMoreElements()) {
-                NetworkInterface iface = interfaces.nextElement();
-                if (!iface.isUp() || iface.isLoopback()) continue;
-
-                Enumeration<InetAddress> addresses = iface.getInetAddresses();
-                while (addresses.hasMoreElements()) {
-                    InetAddress addr = addresses.nextElement();
-                    if (addr instanceof Inet4Address &&
-                            !addr.isLoopbackAddress() &&
-                            !addr.isLinkLocalAddress()) {
-                        localIP = addr.getHostAddress();
-                        break;
-                    }
-                }
-                if (localIP != null) break;
-            }
-        } catch (SocketException e) {
-            e.printStackTrace();
-            return;
-        }
-
-        if (localIP == null) {
-            System.err.println("[CLIENT] No valid local IP found.");
-            return;
-        }
+        String localIP = tcpSocket.getLocalAddress().getHostAddress();
 
         // Step 2: Read the clients.txt file and match IP
         try (BufferedReader reader = new BufferedReader(new FileReader("src/com/networks/p2/clients.txt"))) {
