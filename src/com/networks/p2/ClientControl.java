@@ -224,6 +224,10 @@ public class ClientControl {
         return score;
     }
 
+    public static short getClientID() {
+        return clientID;
+    }
+
     private static void gameOver(String[] results) {
         if (gameStateListener != null) {
             gameStateListener.onGameOver(results);

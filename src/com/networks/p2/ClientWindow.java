@@ -35,7 +35,7 @@ public class ClientWindow implements ActionListener
 //        JOptionPane.showMessageDialog(window, "This is a trivia game");
         gameManager = new ClientControl();
 
-        window = new JFrame("Trivia");
+        window = new JFrame("Trivia - Player ID: " + ClientControl.getClientID());
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setSize(500, 500);
         window.setLocationRelativeTo(null);
