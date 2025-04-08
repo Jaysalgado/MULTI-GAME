@@ -85,7 +85,6 @@ public class ClientControl {
                         setScore(answerRes);
                         break;
                     case GPacket.TYPE_SCORE:
-                        System.out.println("SCORES IN, GAME OVER");
                         byte[] data = packet.getData();
                         ByteBuffer buffer = ByteBuffer.wrap(data);
 
@@ -101,7 +100,6 @@ public class ClientControl {
                         gameOver(result);
                         break;
                     case GPacket.TYPE_KILL:
-                        System.out.println("KILL SHOT");
                         shutdownClient();
                         break;
                     default:
