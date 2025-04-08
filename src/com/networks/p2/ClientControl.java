@@ -179,7 +179,6 @@ public class ClientControl {
         }
     }
     public String[] getQuestion(){
-
         return question;
     }
 
@@ -272,7 +271,7 @@ public class ClientControl {
                     short id = Short.parseShort(parts[0].trim());
                     String ip = parts[1].trim();
                     if (ip.equals(localIP)) {
-                        System.out.println("[CLIENT] IP " + localIP + " matched client ID " + id);
+//                        System.out.println("[CLIENT] IP " + localIP + " matched client ID " + id);
                         clientID = id;
                         break;
                     }

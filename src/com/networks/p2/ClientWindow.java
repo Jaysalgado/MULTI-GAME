@@ -137,7 +137,6 @@ public class ClientWindow implements ActionListener
 
         mainPanel.add(buttonPanel);
 
-
         window.add(mainPanel);
         window.setVisible(true);
 
