@@ -4,7 +4,7 @@ public class Main {
     public static void main(String[] args) {
 
                 if (args.length == 0) {
-                    System.out.println("[Main] No arguments provided. Running both server and client for local testing.");
+                    System.out.println("[Main] No arguments provided. Running both server and client");
 
                     // Start server in background
                     new Thread(() -> new Server().startServer()).start();
