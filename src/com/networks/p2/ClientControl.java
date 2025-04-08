@@ -1,13 +1,11 @@
 package com.networks.p2;
 import java.io.*;
-import java.net.Socket;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
+import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.Properties;
 
 public class ClientControl {
     private static Socket tcpSocket;
@@ -29,12 +27,16 @@ public class ClientControl {
     private static String qNum ="0";
     private static boolean answered = false;
     private volatile boolean running = true;
+    private static short clientID = -1;
+    private static String serverIP;
 
 
     public ClientControl() {
 
         try {
-            tcpSocket = new Socket("localhost", 5555);
+            setServer();
+            setClientID();
+            tcpSocket = new Socket(serverIP, 5555);
             out = new DataOutputStream(tcpSocket.getOutputStream());
             in = new DataInputStream(tcpSocket.getInputStream());
 //            System.out.println("Client on port 5555");
@@ -117,7 +119,7 @@ public class ClientControl {
         try {
             setCanAnswer(false);
             byte[] data = a.getBytes(StandardCharsets.UTF_8);
-            GPacket prep = new GPacket(GPacket.TYPE_ANSWER, (short) 1, System.currentTimeMillis(), data);
+            GPacket prep = new GPacket(GPacket.TYPE_ANSWER, clientID, System.currentTimeMillis(), data);
             byte[] packet = prep.convertToBytes();
             out.write(packet);
             out.flush();
@@ -143,7 +145,7 @@ public class ClientControl {
     public void buzz() {
         try {
             byte[] data = qNum.getBytes(StandardCharsets.UTF_8);
-            GPacket prep = new GPacket(GPacket.TYPE_BUZZ, (short) 1, System.currentTimeMillis(), data);
+            GPacket prep = new GPacket(GPacket.TYPE_BUZZ, clientID, System.currentTimeMillis(), data);
             byte[] packet = prep.convertToBytes();
             sendPacket = new DatagramPacket(packet, packet.length, address, 6666);
             sendSocket.send(sendPacket);
@@ -230,6 +232,75 @@ public class ClientControl {
             gameStateListener.onGameOver(results);
         }
     }
+
+    private static void setServer() {
+        Properties config = new Properties();
+        try (FileInputStream input = new FileInputStream("src/com/networks/p2/config.txt")) {
+            config.load(input);
+            serverIP = config.getProperty("SERVER");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private static void setClientID() {
+        String localIP = null;
+
+        // Step 1: Get non-loopback, non-link-local IPv4 address
+        try {
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface iface = interfaces.nextElement();
+                if (!iface.isUp() || iface.isLoopback()) continue;
+
+                Enumeration<InetAddress> addresses = iface.getInetAddresses();
+                while (addresses.hasMoreElements()) {
+                    InetAddress addr = addresses.nextElement();
+                    if (addr instanceof Inet4Address &&
+                            !addr.isLoopbackAddress() &&
+                            !addr.isLinkLocalAddress()) {
+                        localIP = addr.getHostAddress();
+                        break;
+                    }
+                }
+                if (localIP != null) break;
+            }
+        } catch (SocketException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        if (localIP == null) {
+            System.err.println("[CLIENT] No valid local IP found.");
+            return;
+        }
+
+        // Step 2: Read the clients.txt file and match IP
+        try (BufferedReader reader = new BufferedReader(new FileReader("src/com/networks/p2/clients.txt"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.trim().split(",");
+                if (parts.length == 2) {
+                    short id = Short.parseShort(parts[0].trim());
+                    String ip = parts[1].trim();
+                    if (ip.equals(localIP)) {
+                        System.out.println("[CLIENT] IP " + localIP + " matched client ID " + id);
+                        clientID = id;
+                        break;
+                    }
+                }
+            }
+            if (clientID == -1) {
+                System.err.println("[CLIENT] IP " + localIP + " not found in clients.txt.");
+            }
+
+        } catch (IOException e) {
+            System.err.println("[CLIENT] Failed to read clients.txt.");
+            e.printStackTrace();
+        }
+    }
+
 
     private void shutdownClient() {
         running = false;  // Tells both threads to stop
