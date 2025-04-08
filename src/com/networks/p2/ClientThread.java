@@ -23,15 +23,15 @@ public class ClientThread implements Runnable {
     private boolean allowedToAnswer = false;
     private Timer answerTimer;
 
-    public ClientThread(Socket socket, BlockingQueue<GPacket> buzzQueue, Server server) {
+    public ClientThread(Socket socket, BlockingQueue<GPacket> buzzQueue, Server server, short predefinedID) {
         this.clientSocket = socket;
         this.buzzQueue = buzzQueue;
         this.server = server;
+        this.clientID = predefinedID;
 
         try {
             input = new DataInputStream(clientSocket.getInputStream());
             output = new DataOutputStream(clientSocket.getOutputStream());
-            generateClientID();
         } catch (IOException e) {
             System.err.println("[ClientThread] Error setting up streams: " + e.getMessage());
             running = false;

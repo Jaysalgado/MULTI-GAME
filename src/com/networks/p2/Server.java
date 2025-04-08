@@ -21,6 +21,7 @@ public class Server {
     private final Map<Integer, Integer> correctAnswers = new HashMap<>();
     private final List<Question> questionBank = new ArrayList<>();
     private final Map<Short, Integer> previousClientScores = new ConcurrentHashMap<>();
+    private final Map<String, Short> ipToClientID = new HashMap<>();
 
     private int currentQuestionIndex = 0;
     private GPacket currentQuestionPacket = null;
@@ -38,6 +39,7 @@ public class Server {
 
         loadQuestions();
         loadAnswers();
+        loadStaticClientList();
 
         udpThread = new UDPThread(UDP_PORT, buzzQueue);
         new Thread(udpThread).start();
@@ -47,7 +49,16 @@ public class Server {
 
             while (true) {
                 Socket clientSocket = serverSocket.accept();
-                ClientThread clientThread = new ClientThread(clientSocket, buzzQueue, this);
+                String clientIP = clientSocket.getInetAddress().getHostAddress();
+
+                Short predefinedID = ipToClientID.get(clientIP);
+                if (predefinedID == null) {
+                    System.out.println("[SERVER] Connection from unknown IP: " + clientIP + ". Closing.");
+                    clientSocket.close();
+                    continue;
+                }
+
+                ClientThread clientThread = new ClientThread(clientSocket, buzzQueue, this, predefinedID);
                 short clientID = clientThread.getClientID();
 
                 activeClients.put(clientID, clientThread);
@@ -264,6 +275,23 @@ public class Server {
         } catch (IOException e) {
             System.err.println("[SERVER] Failed to load answers.txt: " + e.getMessage());
         } catch (NumberFormatException e) {
+        }
+    }
+
+    private void loadStaticClientList() {
+        try (BufferedReader reader = new BufferedReader(new FileReader("src/com/networks/p2/clients.txt"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.trim().split(",");
+                if (parts.length == 2) {
+                    short clientID = Short.parseShort(parts[0].trim());
+                    String ip = parts[1].trim();
+                    ipToClientID.put(ip, clientID);
+                }
+            }
+            System.out.println("[SERVER] Loaded static client ID/IP list.");
+        } catch (IOException e) {
+            System.err.println("[SERVER] Failed to load clients.txt.");
         }
     }
 
