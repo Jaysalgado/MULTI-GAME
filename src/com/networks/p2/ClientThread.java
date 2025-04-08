@@ -11,6 +11,8 @@ public class ClientThread implements Runnable {
     private final Socket clientSocket;
     private final BlockingQueue<GPacket> buzzQueue;
     private final Server server;
+    private int invalidPacketCount = 0;
+    private static final int MAX_INVALID_PACKETS = 3;
 
     private DataInputStream input;
     private DataOutputStream output;
@@ -100,6 +102,7 @@ public class ClientThread implements Runnable {
     private void handleAnswer(GPacket packet) {
         if (!allowedToAnswer) {
             System.out.println("[ClientThread " + clientID + "] Answer ignored: not allowed.");
+            incrementInvalidAndCheck();
             return;
         }
 
@@ -154,5 +157,14 @@ public class ClientThread implements Runnable {
         }
         server.getActiveClients().remove(clientID);
         System.out.println("[ClientThread " + clientID + "] Disconnected.");
+    }
+
+    private void incrementInvalidAndCheck() {
+        invalidPacketCount++;
+        if (invalidPacketCount >= MAX_INVALID_PACKETS) {
+            System.out.println("[ClientThread " + clientID + "] Sending too many invalid packets. Terminating.");
+            sendPacket(new GPacket(GPacket.TYPE_KILL, clientID, System.currentTimeMillis(), "Too many invalid packets".getBytes()));
+            closeConnection();
+        }
     }
 }

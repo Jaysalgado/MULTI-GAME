@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -18,10 +19,12 @@ public class Server {
     private final Map<Short, Integer> clientScores = new ConcurrentHashMap<>();
     private final BlockingQueue<GPacket> buzzQueue = new LinkedBlockingQueue<>();
     private final Map<Integer, Integer> correctAnswers = new HashMap<>();
-
     private final List<Question> questionBank = new ArrayList<>();
+    private final Map<Short, Integer> previousClientScores = new ConcurrentHashMap<>();
 
     private int currentQuestionIndex = 0;
+    private GPacket currentQuestionPacket = null;
+    private long currentQuestionTimestamp = 0;
 
     public static void main(String[] args) {
         new Server().startServer();
@@ -39,7 +42,6 @@ public class Server {
         udpThread = new UDPThread(UDP_PORT, buzzQueue);
         new Thread(udpThread).start();
 
-
         try (ServerSocket serverSocket = new ServerSocket(TCP_PORT)) {
             System.out.println("[SERVER] Listening on TCP port " + TCP_PORT + "...");
 
@@ -49,13 +51,23 @@ public class Server {
                 short clientID = clientThread.getClientID();
 
                 activeClients.put(clientID, clientThread);
-                clientScores.putIfAbsent(clientID, 0);
+
+                int restoredScore = previousClientScores.getOrDefault(clientID, 0);
+                clientScores.put(clientID, restoredScore);
 
                 System.out.println("[SERVER] Client connected → ID: " + clientID +
                         " | IP: " + clientSocket.getInetAddress().getHostAddress() +
                         " | Total clients: " + activeClients.size());
 
                 new Thread(clientThread).start();
+
+                if (currentQuestionPacket != null) {
+                    clientThread.sendPacket(currentQuestionPacket);
+
+                    String msg = "You joined or reconnected mid-game. Current score: " + restoredScore;
+                    GPacket notice = new GPacket((byte) 0x09, clientID, System.currentTimeMillis(), msg.getBytes());
+                    clientThread.sendPacket(notice);
+                }
 
                 if (!gameStarted) {
                     gameStarted = true;
@@ -94,6 +106,9 @@ public class Server {
             String[] qArray = q.getQuestionArray();
             String joined = String.join("::", qArray);
             GPacket questionPacket = new GPacket(GPacket.TYPE_QUESTION, (short) 0, questionTimestamp, joined.getBytes());
+
+            currentQuestionPacket = questionPacket;
+            currentQuestionTimestamp = questionTimestamp;
 
             for (ClientThread client : activeClients.values()) {
                 client.sendPacket(questionPacket);
@@ -172,10 +187,13 @@ public class Server {
 
     private void endGame() {
         System.out.println("\n[GAME OVER] Final scores:");
-        int maxScore = Integer.MIN_VALUE;
-        short winnerID = -1;
+        List<Map.Entry<Short, Integer>> sortedScores = new ArrayList<>(clientScores.entrySet());
+        sortedScores.sort((a, b) -> Integer.compare(b.getValue(), a.getValue()));
 
-        for (Map.Entry<Short, Integer> entry : clientScores.entrySet()) {
+        short winnerID = -1;
+        int maxScore = Integer.MIN_VALUE;
+
+        for (Map.Entry<Short, Integer> entry : sortedScores) {
             System.out.println("Client " + entry.getKey() + ": " + entry.getValue());
             if (entry.getValue() > maxScore) {
                 maxScore = entry.getValue();
@@ -184,6 +202,19 @@ public class Server {
         }
 
         System.out.println("🏆 Winner: Client " + winnerID + " with " + maxScore + " points!");
+
+        ByteBuffer scoreBuffer = ByteBuffer.allocate(4 * sortedScores.size()); // 2 bytes for clientID + 2 for score
+        for (Map.Entry<Short, Integer> entry : sortedScores) {
+            scoreBuffer.putShort(entry.getKey());
+            scoreBuffer.putShort(entry.getValue().shortValue()); // cast score to short (assumes within range)
+        }
+
+        byte[] scoreData = scoreBuffer.array();
+        GPacket scorePacket = new GPacket(GPacket.TYPE_SCORE, (short) 0, System.currentTimeMillis(), scoreData);
+
+        for (ClientThread client : activeClients.values()) {
+            client.sendPacket(scorePacket);
+        }
 
         GPacket kill = new GPacket(GPacket.TYPE_KILL, (short) 0, System.currentTimeMillis(), null);
         for (ClientThread client : activeClients.values()) {
