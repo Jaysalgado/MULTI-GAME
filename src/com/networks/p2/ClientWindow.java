@@ -272,25 +272,6 @@ public class ClientWindow implements ActionListener
                 System.out.println("Button error");
         }
 
-        // test code below to demo enable/disable components
-        // DELETE THE CODE BELOW FROM HERE***
-//        if(poll.isEnabled())
-//        {
-////          poll.setEnabled(false);
-//            gameManager.buzz();
-//            submit.setEnabled(true);
-//        }
-//        else
-//        {
-//            poll.setEnabled(true);
-//            submit.setEnabled(false);
-//        }
-
-
-        // you can also enable disable radio buttons
-//		options[random.nextInt(4)].setEnabled(false);
-//		options[random.nextInt(4)].setEnabled(true);
-        // TILL HERE ***
 
     }
 

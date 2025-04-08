@@ -28,9 +28,10 @@ public class ClientControl {
     private static GameState gameStateListener;
     private static String qNum ="0";
     private static boolean answered = false;
+    private volatile boolean running = true;
+
 
     public ClientControl() {
-
 
         try {
             tcpSocket = new Socket("localhost", 5555);
@@ -57,7 +58,7 @@ public class ClientControl {
     }
 
     private void tcpListen(){
-        while(true){
+        while(running){
             try {
 
                 GPacket packet = GPacket.tcpRead(in);
@@ -99,6 +100,7 @@ public class ClientControl {
                         break;
                     case GPacket.TYPE_KILL:
                         System.out.println("KILL SHOT");
+                        shutdownClient();
                         break;
                     default:
                         System.out.println("Unknown message type: " + packet.getType());
@@ -126,7 +128,7 @@ public class ClientControl {
     }
 
     private void udpListen(){
-        while(true){
+        while(running){
             try {
                 byte[] buffer = new byte[1024];
                 receivePacket = new DatagramPacket(buffer, buffer.length);
@@ -229,7 +231,21 @@ public class ClientControl {
         }
     }
 
+    private void shutdownClient() {
+        running = false;  // Tells both threads to stop
 
+        try {
+            if (in != null) in.close();
+            if (out != null) out.close();
+            if (tcpSocket != null && !tcpSocket.isClosed()) tcpSocket.close();
+            if (receiveSocket != null && !receiveSocket.isClosed()) receiveSocket.close();
+            if (sendSocket != null && !sendSocket.isClosed()) sendSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("Client shut down cleanly.");
+    }
 
 
 }
