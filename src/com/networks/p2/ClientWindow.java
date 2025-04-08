@@ -48,7 +48,7 @@ public class ClientWindow implements ActionListener
         mainPanel.setBackground(new Color(14, 52, 160));
 
         // Question
-        question = new JTextArea("Waiting for the game to begin...");
+        question = new JTextArea("Waiting for the next question...");
         question.setLineWrap(true);
         question.setWrapStyleWord(true);
         question.setEditable(false);
@@ -287,7 +287,8 @@ public class ClientWindow implements ActionListener
             public void run() {
                 SwingUtilities.invokeLater(() -> {
                     if (timeLeft < 0) {
-                        timer.setText(phaseName + " phase ended.");
+                        String endMessage = "BUZZ".equals(phaseName) ? "Waiting for other player to answer ..." : "Did not answer in time!";
+                        timer.setText(endMessage);
                         poll.setEnabled(false);
                         submit.setEnabled(false);
                         for (JRadioButton option : options) option.setEnabled(false);

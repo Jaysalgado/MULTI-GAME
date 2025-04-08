@@ -2,6 +2,7 @@ package com.networks.p2;
 import java.io.*;
 import java.net.*;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -29,7 +30,6 @@ public class ClientControl {
     private volatile boolean running = true;
     private static short clientID = -1;
     private static String serverIP;
-
 
     public ClientControl() {
 
@@ -82,6 +82,13 @@ public class ClientControl {
                     case GPacket.TYPE_ANSWER_RES:
                         String answerRes = new String(packet.getData(), StandardCharsets.UTF_8);
                         setScore(answerRes);
+                        break;
+                    case GPacket.TYPE_REJOIN:
+                        byte[] update = packet.getData();
+                        ByteBuffer scoreBuffer = ByteBuffer.wrap(update);
+                        scoreBuffer.order(ByteOrder.BIG_ENDIAN);
+                        int value = scoreBuffer.getInt();
+                        rejoinScore(value);
                         break;
                     case GPacket.TYPE_SCORE:
                         byte[] data = packet.getData();
@@ -218,6 +225,10 @@ public class ClientControl {
             case "incorrect" -> score -= 10;
             case "timeout" -> score -= 20;
         }
+    }
+
+    private static void rejoinScore(int s) {
+        score = s;
     }
 
     public static int getScore() {
