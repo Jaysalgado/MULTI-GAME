@@ -4,5 +4,6 @@ public interface GameState {
     void onCanBuzzChanged(boolean canBuzz);
     void onCanAnswerChanged(boolean canAnswer);
     void onQuestionReceived(String[] question);
+    void onGameOver(String[] results);
 //    void onStatusChanged(boolean status);
 }

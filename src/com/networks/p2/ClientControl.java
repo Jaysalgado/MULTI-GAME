@@ -4,7 +4,9 @@ import java.net.Socket;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class ClientControl {
@@ -81,6 +83,19 @@ public class ClientControl {
                         break;
                     case GPacket.TYPE_SCORE:
                         System.out.println("SCORES IN, GAME OVER");
+                        byte[] data = packet.getData();
+                        ByteBuffer buffer = ByteBuffer.wrap(data);
+
+                        ArrayList<String> scoreList = new ArrayList<>();
+
+                        while (buffer.remaining() >= 4) {
+                            short clientID = buffer.getShort();
+                            short score = buffer.getShort();
+                            scoreList.add(Short.toString(clientID));
+                            scoreList.add(Short.toString(score));
+                        }
+                        String[] result = scoreList.toArray(new String[0]);
+                        gameOver(result);
                         break;
                     case GPacket.TYPE_KILL:
                         System.out.println("KILL SHOT");
@@ -100,7 +115,7 @@ public class ClientControl {
         try {
             setCanAnswer(false);
             byte[] data = a.getBytes(StandardCharsets.UTF_8);
-            GPacket prep = new GPacket(GPacket.TYPE_ANSWER, (short) 0, System.currentTimeMillis(), data);
+            GPacket prep = new GPacket(GPacket.TYPE_ANSWER, (short) 1, System.currentTimeMillis(), data);
             byte[] packet = prep.convertToBytes();
             out.write(packet);
             out.flush();
@@ -126,7 +141,7 @@ public class ClientControl {
     public void buzz() {
         try {
             byte[] data = qNum.getBytes(StandardCharsets.UTF_8);
-            GPacket prep = new GPacket(GPacket.TYPE_BUZZ, (short) 0, System.currentTimeMillis(), data);
+            GPacket prep = new GPacket(GPacket.TYPE_BUZZ, (short) 1, System.currentTimeMillis(), data);
             byte[] packet = prep.convertToBytes();
             sendPacket = new DatagramPacket(packet, packet.length, address, 6666);
             sendSocket.send(sendPacket);
@@ -207,6 +222,14 @@ public class ClientControl {
     public static int getScore() {
         return score;
     }
+
+    private static void gameOver(String[] results) {
+        if (gameStateListener != null) {
+            gameStateListener.onGameOver(results);
+        }
+    }
+
+
 
 
 }

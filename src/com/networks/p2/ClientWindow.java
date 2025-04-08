@@ -181,6 +181,57 @@ public class ClientWindow implements ActionListener
                     startPhaseTimer(15, "BUZZ");
                 });
             }
+
+            @Override
+            public void onGameOver (String[] results) {
+                SwingUtilities.invokeLater(() -> {
+                    // Create new main panel with same style
+                    window.getContentPane().removeAll();
+                    JPanel leaderboardPanel = new JPanel();
+                    leaderboardPanel.setLayout(new BoxLayout(leaderboardPanel, BoxLayout.Y_AXIS));
+                    leaderboardPanel.setBackground(new Color(14, 52, 160)); // same as before
+                    leaderboardPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+                    // Add "Game Over" Label
+                    JLabel title = new JLabel("Game Over!");
+                    title.setForeground(Color.WHITE);
+                    title.setFont(new Font("Arial", Font.BOLD, 28));
+                    title.setAlignmentX(Component.CENTER_ALIGNMENT);
+                    leaderboardPanel.add(title);
+                    leaderboardPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+
+                    // Add leaderboard entries
+                    JLabel winnerLabel = new JLabel();
+                    winnerLabel.setForeground(Color.YELLOW);
+                    winnerLabel.setFont(new Font("Arial", Font.BOLD, 20));
+                    winnerLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+                    for (int i = 0; i < results.length; i += 2) {
+                        String id = results[i];
+                        String score = results[i + 1];
+
+                        JLabel entry = new JLabel("Client " + id + ": " + score + " points");
+                        entry.setForeground(Color.WHITE);
+                        entry.setFont(new Font("Arial", Font.PLAIN, 16));
+                        entry.setAlignmentX(Component.CENTER_ALIGNMENT);
+                        leaderboardPanel.add(entry);
+
+                        if (i == 0) {
+                            winnerLabel.setText("Winner: Client " + id + " with " + score + " points!");
+                        }
+                    }
+
+                    leaderboardPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+                    leaderboardPanel.add(winnerLabel);
+
+                    // Add panel and refresh
+                    window.getContentPane().add(leaderboardPanel);
+                    window.revalidate();
+                    window.repaint();
+
+                });
+            }
+
         });
 
     }
