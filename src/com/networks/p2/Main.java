@@ -34,7 +34,7 @@ public class Main {
                         break;
 
                     default:
-                        System.out.println("Usage: java Main [server|client|both]");
+                        System.out.println("Usage: java Main [server|client]");
                 }
             }
         }

@@ -40,7 +40,7 @@ public class ClientControl {
             in = new DataInputStream(tcpSocket.getInputStream());
             receiveSocket = new DatagramSocket(udpPort);
             sendSocket = new DatagramSocket();
-            address = InetAddress.getByName("localhost");
+            address = InetAddress.getByName(serverIP);
             setClientID();
             gameStart();
         } catch (IOException e) {
@@ -269,7 +269,6 @@ public class ClientControl {
             e.printStackTrace();
         }
     }
-
 
     private void shutdownClient() {
         running = false;  // Tells both threads to stop
