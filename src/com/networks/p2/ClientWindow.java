@@ -68,7 +68,6 @@ public class ClientWindow implements ActionListener
         mainPanel.add(questionPanel);
         mainPanel.add(Box.createRigidArea(new Dimension(0, 20)));
 
-
         // Options
         JPanel optionsPanel = new JPanel();
         optionsPanel.setLayout(new GridLayout(4, 1, 10, 10));

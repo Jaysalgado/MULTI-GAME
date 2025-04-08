@@ -19,7 +19,7 @@ public class GPacket {
     public static final byte TYPE_ANSWER_RES = 0x06;
     public static final byte TYPE_KILL       = 0x07;
     public static final byte TYPE_SCORE      = 0x08;
-    public static final byte TYPE_REJOIN      = 0x09;
+    public static final byte TYPE_REJOIN     = 0x09;
 
     private byte version;
     private byte type;

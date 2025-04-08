@@ -88,6 +88,7 @@ public class ClientControl {
                         ByteBuffer scoreBuffer = ByteBuffer.wrap(update);
                         scoreBuffer.order(ByteOrder.BIG_ENDIAN);
                         int value = scoreBuffer.getInt();
+                        System.out.println("[CLIENT] Rejoining..." + value);
                         rejoinScore(value);
                         break;
                     case GPacket.TYPE_SCORE:
@@ -98,9 +99,9 @@ public class ClientControl {
 
                         while (buffer.remaining() >= 4) {
                             short clientID = buffer.getShort();
-                            short score = buffer.getShort();
+                            short finalScore = buffer.getShort();
                             scoreList.add(Short.toString(clientID));
-                            scoreList.add(Short.toString(score));
+                            scoreList.add(Short.toString(finalScore));
                         }
                         String[] result = scoreList.toArray(new String[0]);
                         gameOver(result);
@@ -113,10 +114,24 @@ public class ClientControl {
                 }
 
             } catch ( IOException e) {
-                System.out.println("Error: " + e.getMessage());
+                System.err.println("[CLIENT] Connection lost: " + e.getMessage());
+                running = false;
             }
         }
 
+    }
+
+    private void udpListen(){
+        while(running){
+            try {
+                byte[] buffer = new byte[1024];
+                receivePacket = new DatagramPacket(buffer, buffer.length);
+                receiveSocket.receive(receivePacket);
+                GPacket gPacket = GPacket.convertFromBytes(receivePacket.getData());
+            } catch (IOException e) {
+                System.out.println("Error: " + e.getMessage());
+            }
+        }
     }
 
     public void sendAnswer(String a){
@@ -133,18 +148,6 @@ public class ClientControl {
         }
     }
 
-    private void udpListen(){
-        while(running){
-            try {
-                byte[] buffer = new byte[1024];
-                receivePacket = new DatagramPacket(buffer, buffer.length);
-                receiveSocket.receive(receivePacket);
-                GPacket gPacket = GPacket.convertFromBytes(receivePacket.getData());
-            } catch (IOException e) {
-                System.out.println("Error: " + e.getMessage());
-            }
-        }
-    }
 
     public void buzz() {
         try {
@@ -219,7 +222,7 @@ public class ClientControl {
     }
 
     private static void setScore(String s) {
-
+    System.out.println("[CLIENT] Score: " + s);
         switch (s) {
             case "correct" -> score += 10;
             case "incorrect" -> score -= 10;
