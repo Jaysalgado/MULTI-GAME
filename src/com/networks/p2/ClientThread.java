@@ -106,6 +106,7 @@ public class ClientThread implements Runnable {
         }
 
         allowedToAnswer = false;
+        server.setActiveBuzzer(null);
         if (answerTimer != null) answerTimer.cancel();
 
         String answer = new String(packet.getData()).trim();
@@ -156,7 +157,10 @@ public class ClientThread implements Runnable {
 
         if (allowedToAnswer) {
             allowedToAnswer = false;
-            server.reprocessBuzzQueue();
+            if (server.getActiveBuzzer() == clientID) {
+                server.setActiveBuzzer(null);
+                server.reprocessBuzzQueue();
+            }
         }
         System.out.println("[ClientThread " + clientID + "] Disconnected.");
     }

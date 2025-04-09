@@ -27,6 +27,8 @@ public class Server {
     private final Set<Short> buzzedClients = ConcurrentHashMap.newKeySet();
     private final Map<Short, Integer> reconnectCounts = new ConcurrentHashMap<>();
     private final Set<Short> bannedClients = ConcurrentHashMap.newKeySet();
+    private volatile Short activeBuzzer = null;
+
 
     private int currentQuestionIndex = 0;
     private GPacket currentQuestionPacket = null;
@@ -172,6 +174,7 @@ public class Server {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+                buzzQueue.clear();
             }
 
             GPacket nextPacket = new GPacket(GPacket.TYPE_NEXT, (short) 0, questionTimestamp, null);
@@ -210,6 +213,7 @@ public class Server {
             buzzer.sendBuzzResult(true, questionTimestamp);
             buzzer.allowAnswer(questionTimestamp);
             buzzedClients.add(buzzerID);
+            setActiveBuzzer(buzzerID);
             return true;
         }
 
@@ -347,4 +351,8 @@ public class Server {
     public void incrementQuestionIndex() {
         currentQuestionIndex++;
     }
+
+    public synchronized void setActiveBuzzer(Short id) { this.activeBuzzer = id; }
+
+    public synchronized Short getActiveBuzzer() { return this.activeBuzzer; }
 }
