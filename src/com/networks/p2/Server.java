@@ -204,17 +204,23 @@ public class Server {
             if (alreadyProcessed.contains(buzzerID)) continue;
 
             ClientThread buzzer = activeClients.get(buzzerID);
-            if (buzzer != null && buzzer.isRunning()) {
-                if (alreadyProcessed.isEmpty()) {
-                    buzzer.sendBuzzResult(true, questionTimestamp);
-                    buzzer.allowAnswer(questionTimestamp);
-                    buzzedClients.add(buzzerID);
-                    someoneBuzzed = true;
-                } else {
-                    buzzer.sendBuzzResult(false, questionTimestamp);
-                }
-                alreadyProcessed.add(buzzerID);
+
+            if (buzzer == null || !buzzer.isRunning()) {
+                System.out.println("[SERVER] Skipping buzzer " + buzzerID + " (disconnected or null)");
+                continue;
             }
+
+            if (!someoneBuzzed) {
+                // FIRST eligible buzzer
+                buzzer.sendBuzzResult(true, questionTimestamp);
+                buzzer.allowAnswer(questionTimestamp);
+                buzzedClients.add(buzzerID);
+                someoneBuzzed = true;
+            } else {
+                buzzer.sendBuzzResult(false, questionTimestamp);
+            }
+
+            alreadyProcessed.add(buzzerID);
         }
 
         if (!someoneBuzzed) {
