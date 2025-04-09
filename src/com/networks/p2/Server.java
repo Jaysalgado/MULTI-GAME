@@ -322,7 +322,14 @@ public class Server {
     public synchronized void reprocessBuzzQueue() {
         boolean newBuzzWinner = processBuzzes(currentQuestionTimestamp);
 
-        if (!newBuzzWinner) {
+        if (newBuzzWinner) {
+            try {
+                Thread.sleep(10_000);
+            } catch (InterruptedException e) {
+                System.err.println("[SERVER] Interrupted while waiting after reassignment.");
+            }
+        } else {
+            System.out.println("[SERVER] No remaining buzzers to reassign.");
         }
     }
 
