@@ -204,7 +204,7 @@ public class Server {
             if (alreadyProcessed.contains(buzzerID)) continue;
 
             ClientThread buzzer = activeClients.get(buzzerID);
-            if (buzzer != null) {
+            if (buzzer != null && buzzer.isRunning()) {
                 if (alreadyProcessed.isEmpty()) {
                     buzzer.sendBuzzResult(true, questionTimestamp);
                     buzzer.allowAnswer(questionTimestamp);

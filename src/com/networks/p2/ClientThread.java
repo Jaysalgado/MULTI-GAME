@@ -162,4 +162,6 @@ public class ClientThread implements Runnable {
             closeConnection();
         }
     }
+
+    public boolean isRunning() { return running; }
 }
