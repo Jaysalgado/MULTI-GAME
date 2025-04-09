@@ -204,7 +204,7 @@ public class Server {
 
             if (buzzer == null || !buzzer.isRunning()) {
                 System.out.println("[SERVER] Skipping buzzer " + buzzerID + " (disconnected)");
-                continue; // ⬅️ This is key: try next buzz
+                continue;
             }
 
             buzzer.sendBuzzResult(true, questionTimestamp);
