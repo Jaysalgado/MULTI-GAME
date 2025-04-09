@@ -211,7 +211,6 @@ public class Server {
             }
 
             if (!someoneBuzzed) {
-                // FIRST eligible buzzer
                 buzzer.sendBuzzResult(true, questionTimestamp);
                 buzzer.allowAnswer(questionTimestamp);
                 buzzedClients.add(buzzerID);
