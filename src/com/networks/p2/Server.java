@@ -183,7 +183,6 @@ public class Server {
 
     private boolean processBuzzes(long questionTimestamp) {
         Set<Short> alreadyProcessed = new HashSet<>();
-        boolean someoneBuzzed = false;
 
         while (!buzzQueue.isEmpty()) {
             GPacket buzz = buzzQueue.poll();
@@ -204,29 +203,19 @@ public class Server {
             if (alreadyProcessed.contains(buzzerID)) continue;
 
             ClientThread buzzer = activeClients.get(buzzerID);
-
             if (buzzer == null || !buzzer.isRunning()) {
                 System.out.println("[SERVER] Skipping buzzer " + buzzerID + " (disconnected or null)");
                 continue;
             }
 
-            if (!someoneBuzzed) {
-                buzzer.sendBuzzResult(true, questionTimestamp);
-                buzzer.allowAnswer(questionTimestamp);
-                buzzedClients.add(buzzerID);
-                someoneBuzzed = true;
-            } else {
-                buzzer.sendBuzzResult(false, questionTimestamp);
-            }
-
+            buzzer.sendBuzzResult(true, questionTimestamp);
+            buzzer.allowAnswer(questionTimestamp);
+            buzzedClients.add(buzzerID);
             alreadyProcessed.add(buzzerID);
+            return true;
         }
-
-        if (!someoneBuzzed) {
-            System.out.println("[GAME] No one buzzed in.");
-        }
-
-        return someoneBuzzed;
+        System.out.println("[GAME] No one buzzed in.");
+        return false;
     }
 
     private void endGame() {
