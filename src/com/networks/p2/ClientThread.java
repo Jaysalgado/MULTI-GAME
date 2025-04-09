@@ -155,10 +155,10 @@ public class ClientThread implements Runnable {
 
         server.getPreviousClientScores().put(clientID, server.getClientScores().getOrDefault(clientID, 0));
 
-        if (server.getActiveBuzzer() != null && server.getActiveBuzzer() == clientID) {
+        assert buzzQueue.peek() != null;
+        if(buzzQueue.peek().getNodeID() == clientID){
             System.out.println("[ClientThread " + clientID + "] was active buzzer and disconnected — reprocessing buzz queue...");
-            server.setActiveBuzzer(null);
-            server.reprocessBuzzQueue();
+            buzzQueue.poll();
         }
 
         System.out.println("[ClientThread " + clientID + "] Disconnected.");

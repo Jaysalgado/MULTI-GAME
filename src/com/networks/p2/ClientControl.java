@@ -20,13 +20,11 @@ public class ClientControl {
     private static DataInputStream in;
     private static int score = 0;
     private static String[] question;
-    private static int next;
     private static boolean status = true;
     private static boolean canBuzz = true;
     private static boolean canAnswer = false;
     private static GameState gameStateListener;
     private static String qNum ="0";
-    private static boolean answered = false;
     private volatile boolean running = true;
     private static short clientID = -1;
     private static String serverIP;
@@ -142,7 +140,6 @@ public class ClientControl {
             byte[] packet = prep.convertToBytes();
             out.write(packet);
             out.flush();
-            answered = true;
         }  catch (IOException e) {
             throw new RuntimeException(e);
         }
