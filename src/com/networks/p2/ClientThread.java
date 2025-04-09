@@ -82,8 +82,12 @@ public class ClientThread implements Runnable {
     }
 
     public void allowAnswer(long questionTimestamp) {
+        if (!server.getBuzzedClients().contains(clientID)) {
+            System.out.println("[ClientThread " + clientID + "] Reconnected. Unauthorized to answer.");
+            return;
+        }
+
         allowedToAnswer = true;
-        System.out.println("[ClientThread " + clientID + "] Allowed to answer...");
 
         answerTimer = new Timer();
         answerTimer.schedule(new TimerTask() {
@@ -92,7 +96,6 @@ public class ClientThread implements Runnable {
                 if (allowedToAnswer) {
                     allowedToAnswer = false;
                     server.getClientScores().merge(clientID, -20, Integer::sum);
-                    System.out.println("[ClientThread " + clientID + "] Timed out! -20 points.");
                     sendPacket(new GPacket(GPacket.TYPE_ANSWER_RES, clientID, questionTimestamp, "timeout".getBytes()));
                 }
             }
@@ -118,7 +121,6 @@ public class ClientThread implements Runnable {
         try {
             selectedIndex = Integer.parseInt(answer);
         } catch (NumberFormatException e) {
-            System.out.println("[ClientThread " + clientID + "] Invalid answer format: " + answer);
             selectedIndex = -1;
         }
 
@@ -129,7 +131,6 @@ public class ClientThread implements Runnable {
         server.getClientScores().merge(clientID, scoreDelta, Integer::sum);
 
         sendPacket(new GPacket(GPacket.TYPE_ANSWER_RES, clientID, System.currentTimeMillis(), result.getBytes()));
-        System.out.println("[ClientThread " + clientID + "] Answered: " + answer + " → " + result);
     }
 
 
@@ -138,7 +139,6 @@ public class ClientThread implements Runnable {
             output.write(packet.convertToBytes());
             output.flush();
         } catch (IOException e) {
-            System.err.println("[ClientThread " + clientID + "] Failed to send packet: " + e.getMessage());
             running = false;
         }
     }

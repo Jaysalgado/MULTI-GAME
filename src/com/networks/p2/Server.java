@@ -22,6 +22,9 @@ public class Server {
     private final List<Question> questionBank = new ArrayList<>();
     private final Map<Short, Integer> previousClientScores = new ConcurrentHashMap<>();
     private final Map<String, Short> ipToClientID = new HashMap<>();
+    private final Set<Short> buzzedClients = ConcurrentHashMap.newKeySet();
+    private final Map<Short, Integer> reconnectCounts = new ConcurrentHashMap<>();
+    private final Set<Short> bannedClients = ConcurrentHashMap.newKeySet();
 
     private int currentQuestionIndex = 0;
     private GPacket currentQuestionPacket = null;
@@ -51,9 +54,26 @@ public class Server {
                 Socket clientSocket = serverSocket.accept();
                 String clientIP = clientSocket.getInetAddress().getHostAddress();
 
-                Short predefinedID = ipToClientID.get(clientIP);
-                if (predefinedID == null) {
-                    System.out.println("[SERVER] Connection from unknown IP: " + clientIP + ". Closing.");
+                short predefinedID = 1;
+//                Short predefinedID = ipToClientID.get(clientIP);
+//                if (predefinedID == null) {
+//                    System.out.println("[SERVER] Connection from unknown IP: " + clientIP + ". Closing.");
+//                    clientSocket.close();
+//                    continue;
+//                }
+
+                if (bannedClients.contains(predefinedID)) {
+                    System.out.println("[SERVER] Banned client attempted reconnection - ID: " + predefinedID);
+                    clientSocket.close();
+                    continue;
+                }
+
+                int reconnectCount = reconnectCounts.getOrDefault(predefinedID, 0) + 1;
+                reconnectCounts.put(predefinedID, reconnectCount);
+
+                if (reconnectCount > 3) {
+                    System.out.println("[SERVER] Client ID " + predefinedID + " exceeded reconnect limit. Banned.");
+                    bannedClients.add(predefinedID);
                     clientSocket.close();
                     continue;
                 }
@@ -75,9 +95,9 @@ public class Server {
                 if (currentQuestionPacket != null) {
                     clientThread.sendPacket(currentQuestionPacket);
 
-                    String msg = "You joined or reconnected mid-game. Current score: " + restoredScore;
-//                    GPacket notice = new GPacket((byte) 0x09, clientID, System.currentTimeMillis(), msg.getBytes());
-//                    clientThread.sendPacket(notice);
+                    String msg = "You joined/reconnected mid-game. Current score: " + restoredScore;
+                    GPacket notice = new GPacket((byte) 0x09, clientID, System.currentTimeMillis(), msg.getBytes());
+                    clientThread.sendPacket(notice);
                 }
 
                 if (!gameStarted) {
@@ -106,6 +126,8 @@ public class Server {
         final int TOTAL_QUESTIONS = 20;
 
         for (int qIndex = 0; qIndex < TOTAL_QUESTIONS && qIndex < questionBank.size(); qIndex++) {
+            buzzedClients.clear();
+
             currentQuestionIndex = qIndex;
             Question q = questionBank.get(qIndex);
             long questionTimestamp = System.currentTimeMillis();
@@ -125,7 +147,7 @@ public class Server {
                 client.sendPacket(questionPacket);
             }
 
-            System.out.println("[GAME] Buzz phase started...");
+            System.out.println("[GAME] Buzz phase started.");
 
             try {
                 Thread.sleep(15_000);
@@ -154,7 +176,6 @@ public class Server {
     }
 
     private boolean processBuzzes(long questionTimestamp) {
-        System.out.println("[SERVER] Processing buzzes... queue size before: " + buzzQueue.size());
         Set<Short> alreadyProcessed = new HashSet<>();
         boolean someoneBuzzed = false;
 
@@ -167,7 +188,7 @@ public class Server {
             try {
                 questionIndex = Integer.parseInt(dataStr);
             } catch (NumberFormatException e) {
-                System.out.println("[SERVER] Invalid buzz data from client " + buzz.getNodeID() + ": " + dataStr);
+                System.out.println("[SERVER] Exception Error: Invalid buzz from client " + buzz.getNodeID() + ": " + dataStr);
                 continue;
             }
 
@@ -181,6 +202,7 @@ public class Server {
                 if (alreadyProcessed.isEmpty()) {
                     buzzer.sendBuzzResult(true, questionTimestamp);
                     buzzer.allowAnswer(questionTimestamp);
+                    buzzedClients.add(buzzerID);
                     someoneBuzzed = true;
                 } else {
                     buzzer.sendBuzzResult(false, questionTimestamp);
@@ -241,7 +263,6 @@ public class Server {
 
                 String[] parts = line.split(",");
                 if (parts.length != 6) {
-                    System.out.println("[SERVER] Skipping malformed line: " + line);
                     continue;
                 }
 
@@ -263,7 +284,6 @@ public class Server {
 
                 String[] parts = line.split(",");
                 if (parts.length != 2) {
-                    System.out.println("[SERVER] Skipping malformed answer line: " + line);
                     continue;
                 }
 
@@ -291,7 +311,7 @@ public class Server {
             }
             System.out.println("[SERVER] Loaded static client ID/IP list.");
         } catch (IOException e) {
-            System.err.println("[SERVER] Failed to load clients.txt.");
+            System.err.println("[SERVER] Exception error:Failed to load clients.txt.");
         }
     }
 
@@ -312,6 +332,8 @@ public class Server {
     public int getCurrentQuestionIndex() {
         return currentQuestionIndex;
     }
+
+    public Set<Short> getBuzzedClients() { return buzzedClients; }
 
     public void incrementQuestionIndex() {
         currentQuestionIndex++;

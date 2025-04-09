@@ -50,7 +50,6 @@ public class UDPThread implements Runnable {
                 try {
                     questionIndex = Integer.parseInt(dataString);
                 } catch (NumberFormatException e) {
-                    System.out.println("[UDPThread] Invalid buzz data from client " + clientID + ": " + dataString);
                     continue;
                 }
 
@@ -60,16 +59,14 @@ public class UDPThread implements Runnable {
                 }
 
                 if (lastBuzzTimestamps.containsKey(clientID)) {
-                    System.out.println("[UDPThread] Duplicate buzz from client " + clientID + " ignored.");
                     continue;
                 }
 
                 lastBuzzTimestamps.put(clientID, System.currentTimeMillis());
                 buzzQueue.put(gPacket);
-                System.out.println("[UDPThread] Buzz accepted from client " + clientID + " (queue size: " + buzzQueue.size() + ")");
             }
         } catch (SocketException e) {
-            System.err.println("[UDPThread] Socket closed or unavailable: " + e.getMessage());
+            System.err.println("[UDPThread] Socket unavailable: " + e.getMessage());
         } catch (IOException e) {
             System.err.println("[UDPThread] I/O error: " + e.getMessage());
         } catch (InterruptedException e) {
