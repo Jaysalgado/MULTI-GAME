@@ -28,6 +28,7 @@ public class Server {
     private final Map<Short, Integer> reconnectCounts = new ConcurrentHashMap<>();
     private final Set<Short> bannedClients = ConcurrentHashMap.newKeySet();
     private volatile Short activeBuzzer = null;
+    private final Set<Short> processedBuzzers = ConcurrentHashMap.newKeySet();
 
 
     private int currentQuestionIndex = 0;
@@ -136,6 +137,7 @@ public class Server {
         final int TOTAL_QUESTIONS = 20;
 
         for (int qIndex = 0; qIndex < TOTAL_QUESTIONS && qIndex < questionBank.size(); qIndex++) {
+            processedBuzzers.clear();
             buzzedClients.clear();
 
             currentQuestionIndex = qIndex;
@@ -174,7 +176,6 @@ public class Server {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                buzzQueue.clear();
             }
 
             GPacket nextPacket = new GPacket(GPacket.TYPE_NEXT, (short) 0, questionTimestamp, null);
@@ -188,32 +189,45 @@ public class Server {
 
     private boolean processBuzzes(long questionTimestamp) {
         while (!buzzQueue.isEmpty()) {
-            GPacket buzz = buzzQueue.poll();
+            GPacket buzz = buzzQueue.peek();
             if (buzz == null) continue;
+
+            short buzzerID = buzz.getNodeID();
+            if (processedBuzzers.contains(buzzerID)) {
+                buzzQueue.poll();
+                continue;
+            }
 
             String dataStr = new String(buzz.getData()).trim();
             int questionIndex;
             try {
                 questionIndex = Integer.parseInt(dataStr);
             } catch (NumberFormatException e) {
-                System.out.println("[SERVER] Invalid buzz from client " + buzz.getNodeID() + ": " + dataStr);
+                System.out.println("[SERVER] Invalid buzz from client " + buzzerID + ": " + dataStr);
+                buzzQueue.poll();
                 continue;
             }
 
-            if (questionIndex != currentQuestionIndex) continue;
+            if (questionIndex != currentQuestionIndex) {
+                buzzQueue.poll();
+                continue;
+            }
 
-            short buzzerID = buzz.getNodeID();
             ClientThread buzzer = activeClients.get(buzzerID);
 
             if (buzzer == null || !buzzer.isRunning()) {
-                System.out.println("[SERVER] Skipping buzzer " + buzzerID + " (disconnected)");
+                processedBuzzers.add(buzzerID);
+                buzzQueue.poll();
                 continue;
             }
 
             buzzer.sendBuzzResult(true, questionTimestamp);
             buzzer.allowAnswer(questionTimestamp);
             buzzedClients.add(buzzerID);
+            processedBuzzers.add(buzzerID);
             setActiveBuzzer(buzzerID);
+
+            buzzQueue.poll();
             return true;
         }
 
