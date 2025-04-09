@@ -104,10 +104,6 @@ public class Server {
 
                 if (currentQuestionPacket != null) {
                     clientThread.sendPacket(currentQuestionPacket);
-
-                    String msg = "You joined/reconnected mid-game. Current score: " + restoredScore;
-                    GPacket notice = new GPacket((byte) 0x09, clientID, System.currentTimeMillis(), msg.getBytes());
-                    clientThread.sendPacket(notice);
                 }
 
                 if (!gameStarted) {
