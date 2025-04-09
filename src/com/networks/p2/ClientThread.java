@@ -82,11 +82,6 @@ public class ClientThread implements Runnable {
     }
 
     public void allowAnswer(long questionTimestamp) {
-        if (!server.getBuzzedClients().contains(clientID)) {
-            System.out.println("[ClientThread " + clientID + "] Reconnected. Unauthorized to answer.");
-            return;
-        }
-
         allowedToAnswer = true;
 
         answerTimer = new Timer();
