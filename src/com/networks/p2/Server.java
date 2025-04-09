@@ -341,6 +341,8 @@ public class Server {
 
     public Set<Short> getBuzzedClients() { return buzzedClients; }
 
+    public Map<Short, Integer> getPreviousClientScores() { return previousClientScores; }
+
     public void incrementQuestionIndex() {
         currentQuestionIndex++;
     }
