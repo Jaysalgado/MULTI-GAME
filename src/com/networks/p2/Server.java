@@ -86,6 +86,11 @@ public class Server {
                 int restoredScore = previousClientScores.getOrDefault(clientID, 0);
                 clientScores.put(clientID, restoredScore);
 
+                ByteBuffer rejoinUP = ByteBuffer.allocate(4);
+                rejoinUP.putInt(restoredScore);
+                GPacket rejoinPacket = new GPacket(GPacket.TYPE_REJOIN, clientID, System.currentTimeMillis(), rejoinUP.array());
+                clientThread.sendPacket(rejoinPacket);
+
                 System.out.println("[SERVER] Client connected → ID: " + clientID +
                         " | IP: " + clientSocket.getInetAddress().getHostAddress() +
                         " | Total clients: " + activeClients.size());
