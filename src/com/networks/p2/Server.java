@@ -334,17 +334,21 @@ public class Server {
     }
 
     public synchronized void reprocessBuzzQueue() {
-        boolean newBuzzWinner = processBuzzes(currentQuestionTimestamp);
+        while (!buzzQueue.isEmpty()) {
+            boolean newBuzzWinner = processBuzzes(currentQuestionTimestamp);
 
-        if (newBuzzWinner) {
-            try {
-                Thread.sleep(10_000);
-            } catch (InterruptedException e) {
-                System.err.println("[SERVER] Interrupted while waiting after reassignment.");
+            if (newBuzzWinner) {
+                System.out.println("[SERVER] New buzzer found from queue.");
+                try {
+                    Thread.sleep(10_000);
+                } catch (InterruptedException e) {
+                    System.err.println("[SERVER] Interrupted while waiting after reassignment.");
+                }
+                return;
             }
-        } else {
-            System.out.println("[SERVER] No remaining buzzers to reassign.");
         }
+
+        System.out.println("[SERVER] No remaining buzzers to reassign.");
     }
 
     public List<Question> getQuestionBank() {
