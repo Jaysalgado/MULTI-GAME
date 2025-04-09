@@ -150,7 +150,13 @@ public class ClientThread implements Runnable {
         } catch (IOException e) {
             System.err.println("[ClientThread " + clientID + "] Error closing socket.");
         }
+
+        if (allowedToAnswer) {
+            System.out.println("[ClientThread " + clientID + "] Disconnected while allowed to answer. Reprocessing buzz queue...");
+            server.reprocessBuzzQueue();
+        }
         server.getPreviousClientScores().put(clientID, server.getClientScores().getOrDefault(clientID, 0));
+        server.getActiveClients().remove(clientID);
         System.out.println("[ClientThread " + clientID + "] Disconnected.");
     }
 

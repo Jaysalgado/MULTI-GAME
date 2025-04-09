@@ -315,6 +315,13 @@ public class Server {
         }
     }
 
+    public synchronized void reprocessBuzzQueue() {
+        boolean newBuzzWinner = processBuzzes(currentQuestionTimestamp);
+
+        if (!newBuzzWinner) {
+        }
+    }
+
     public List<Question> getQuestionBank() {
         return questionBank;
     }
