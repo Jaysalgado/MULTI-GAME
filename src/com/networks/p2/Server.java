@@ -54,7 +54,12 @@ public class Server {
                 Socket clientSocket = serverSocket.accept();
                 String clientIP = clientSocket.getInetAddress().getHostAddress();
 
-                short predefinedID = 1;
+                Short predefinedID = ipToClientID.get(clientIP);
+                if (predefinedID == null) {
+                    System.out.println("[SERVER] Connection from unknown IP: " + clientIP + ". Closing.");
+                    clientSocket.close();
+                    continue;
+                }
 //                Short predefinedID = ipToClientID.get(clientIP);
 //                if (predefinedID == null) {
 //                    System.out.println("[SERVER] Connection from unknown IP: " + clientIP + ". Closing.");
