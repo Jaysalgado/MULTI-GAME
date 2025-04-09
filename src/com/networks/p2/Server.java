@@ -8,6 +8,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.PriorityBlockingQueue;
 
 public class Server {
     private UDPThread udpThread;
@@ -17,7 +18,8 @@ public class Server {
 
     private final Map<Short, ClientThread> activeClients = new ConcurrentHashMap<>();
     private final Map<Short, Integer> clientScores = new ConcurrentHashMap<>();
-    private final BlockingQueue<GPacket> buzzQueue = new LinkedBlockingQueue<>();
+    private final PriorityBlockingQueue<GPacket> buzzQueue =
+            new PriorityBlockingQueue<>(100, Comparator.comparingLong(GPacket::getTimestamp));
     private final Map<Integer, Integer> correctAnswers = new HashMap<>();
     private final List<Question> questionBank = new ArrayList<>();
     private final Map<Short, Integer> previousClientScores = new ConcurrentHashMap<>();

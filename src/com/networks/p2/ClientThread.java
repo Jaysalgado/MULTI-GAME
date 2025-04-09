@@ -6,10 +6,11 @@ import java.security.SecureRandom;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.PriorityBlockingQueue;
 
 public class ClientThread implements Runnable {
     private final Socket clientSocket;
-    private final BlockingQueue<GPacket> buzzQueue;
+    private final PriorityBlockingQueue<GPacket> buzzQueue;
     private final Server server;
     private int invalidPacketCount = 0;
     private static final int MAX_INVALID_PACKETS = 3;
@@ -23,7 +24,7 @@ public class ClientThread implements Runnable {
     private boolean allowedToAnswer = false;
     private Timer answerTimer;
 
-    public ClientThread(Socket socket, BlockingQueue<GPacket> buzzQueue, Server server, short predefinedID) {
+    public ClientThread(Socket socket, PriorityBlockingQueue<GPacket> buzzQueue, Server server, short predefinedID) {
         this.clientSocket = socket;
         this.buzzQueue = buzzQueue;
         this.server = server;
@@ -151,12 +152,12 @@ public class ClientThread implements Runnable {
             System.err.println("[ClientThread " + clientID + "] Error closing socket.");
         }
 
+        server.getPreviousClientScores().put(clientID, server.getClientScores().getOrDefault(clientID, 0));
+
         if (allowedToAnswer) {
-            System.out.println("[ClientThread " + clientID + "] Disconnected while allowed to answer. Reprocessing buzz queue...");
+            allowedToAnswer = false;
             server.reprocessBuzzQueue();
         }
-        server.getPreviousClientScores().put(clientID, server.getClientScores().getOrDefault(clientID, 0));
-        server.getActiveClients().remove(clientID);
         System.out.println("[ClientThread " + clientID + "] Disconnected.");
     }
 

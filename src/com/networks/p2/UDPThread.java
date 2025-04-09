@@ -5,17 +5,18 @@ import java.net.*;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.PriorityBlockingQueue;
 
 public class UDPThread implements Runnable {
     private final int udpPort;
-    private final BlockingQueue<GPacket> buzzQueue;
+    private final PriorityBlockingQueue<GPacket> buzzQueue;
     private DatagramSocket socket;
     private boolean running = true;
 
     private final Map<Short, Long> lastBuzzTimestamps = new ConcurrentHashMap<>();
     private volatile int currentQuestionIndex = -1;
 
-    public UDPThread(int udpPort, BlockingQueue<GPacket> buzzQueue) {
+    public UDPThread(int udpPort, PriorityBlockingQueue<GPacket> buzzQueue) {
         this.udpPort = udpPort;
         this.buzzQueue = buzzQueue;
     }
@@ -69,8 +70,6 @@ public class UDPThread implements Runnable {
             System.err.println("[UDPThread] Socket unavailable: " + e.getMessage());
         } catch (IOException e) {
             System.err.println("[UDPThread] I/O error: " + e.getMessage());
-        } catch (InterruptedException e) {
-            System.err.println("[UDPThread] Thread interrupted while putting into queue.");
         } finally {
             if (socket != null && !socket.isClosed()) {
                 socket.close();
