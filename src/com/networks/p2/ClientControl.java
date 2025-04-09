@@ -86,7 +86,6 @@ public class ClientControl {
                         ByteBuffer scoreBuffer = ByteBuffer.wrap(update);
                         scoreBuffer.order(ByteOrder.BIG_ENDIAN);
                         int value = scoreBuffer.getInt();
-                        System.out.println("[CLIENT] Rejoining..." + value);
                         rejoinScore(value);
                         break;
                     case GPacket.TYPE_SCORE:
@@ -218,7 +217,6 @@ public class ClientControl {
     }
 
     private static void setScore(String s) {
-    System.out.println("[CLIENT] Score: " + s);
         switch (s) {
             case "correct" -> score += 10;
             case "incorrect" -> score -= 10;
