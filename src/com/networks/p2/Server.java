@@ -184,41 +184,39 @@ public class Server {
     }
 
     private boolean processBuzzes(long questionTimestamp) {
-        Set<Short> alreadyProcessed = new HashSet<>();
-
         while (!buzzQueue.isEmpty()) {
             GPacket buzz = buzzQueue.poll();
-            if (buzz == null) break;
+            if (buzz == null) continue;
 
             String dataStr = new String(buzz.getData()).trim();
             int questionIndex;
             try {
                 questionIndex = Integer.parseInt(dataStr);
             } catch (NumberFormatException e) {
-                System.out.println("[SERVER] Exception Error: Invalid buzz from client " + buzz.getNodeID() + ": " + dataStr);
+                System.out.println("[SERVER] Invalid buzz from client " + buzz.getNodeID() + ": " + dataStr);
                 continue;
             }
 
             if (questionIndex != currentQuestionIndex) continue;
 
             short buzzerID = buzz.getNodeID();
-            if (alreadyProcessed.contains(buzzerID)) continue;
-
             ClientThread buzzer = activeClients.get(buzzerID);
+
             if (buzzer == null || !buzzer.isRunning()) {
-                System.out.println("[SERVER] Skipping buzzer " + buzzerID + " (disconnected or null)");
-                continue;
+                System.out.println("[SERVER] Skipping buzzer " + buzzerID + " (disconnected)");
+                continue; // ⬅️ This is key: try next buzz
             }
 
             buzzer.sendBuzzResult(true, questionTimestamp);
             buzzer.allowAnswer(questionTimestamp);
             buzzedClients.add(buzzerID);
-            alreadyProcessed.add(buzzerID);
             return true;
         }
+
         System.out.println("[GAME] No one buzzed in.");
         return false;
     }
+
 
     private void endGame() {
         System.out.println("\n[GAME OVER] Final scores:");
