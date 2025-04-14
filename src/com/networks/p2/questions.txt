@@ -7,7 +7,7 @@ Who was the Eagles’ head coach during the 2025 Super Bowl?,Sean McVay,Nick Sir
 Which NFC team won the 2025 Super Bowl?,49ers,Lions,Cowboys,Eagles,6
 What color jerseys did the Eagles wear in the 2025 Super Bowl?,White,Silver,Black,Green,7
 Who caught the game-winning touchdown for the Eagles in 2025?,Dallas Goedert,Julio Jones,A.J. Brown,DeVonta Smith,8
-What was the final score of the 2025 Super Bowl?,24-20,31-27,28-24,38-35,9
+What was the final score of the 2025 Super Bowl?,40-22,31-27,28-24,38-35,9
 How many touchdowns did Jalen Hurts score in the 2025 Super Bowl?,4,2,3,1,10
 What quarter did the Eagles take the lead in the 2025 Super Bowl?,2nd,1st,4th,3rd,11
 Which player had a key interception for the Eagles in the 2025 Super Bowl?,James Bradberry,C.J. Gardner-Johnson,Darius Slay,Hasson Reddick,12
