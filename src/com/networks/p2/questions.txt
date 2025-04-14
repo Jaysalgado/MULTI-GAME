@@ -1,8 +1,8 @@
 Who won the Super Bowl in 2025?,Chiefs,Eagles,Cowboys,Packers,0
-Which team defeated the Chiefs in the 2025 Super Bowl?,Bills,Eagles,Rams,49ers,1
+Which superhero does Dr.J hate?,spider-man,batman,ant-man,superman,1
 Who was the MVP of the 2025 Super Bowl?,Patrick Mahomes,Dak Prescott,Jalen Hurts,Aaron Rodgers,2
 Where was the 2025 Super Bowl held?,Los Angeles,Dallas,Las Vegas,Miami,3
-How many Super Bowls have the Eagles won after 2025?,3,2,1,4,4
+Where is Dr.J's favorite vacation spot?,Florida,Alabama,Las Vegas,New York,4
 Who was the Eagles’ head coach during the 2025 Super Bowl?,Sean McVay,Nick Sirianni,Andy Reid,Kyle Shanahan,5
 Which NFC team won the 2025 Super Bowl?,49ers,Lions,Cowboys,Eagles,6
 What color jerseys did the Eagles wear in the 2025 Super Bowl?,White,Silver,Black,Green,7
