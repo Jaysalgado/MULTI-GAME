@@ -1,7 +1,7 @@
 Who won the Super Bowl in 2025?,Chiefs,Eagles,Cowboys,Packers,0
 Which superhero does Dr.J hate?,spider-man,batman,ant-man,superman,1
 Who was the MVP of the 2025 Super Bowl?,Patrick Mahomes,Dak Prescott,Jalen Hurts,Aaron Rodgers,2
-Where was the 2025 Super Bowl held?,Los Angeles,Dallas,Las Vegas,Miami,3
+How does Dr.J feel about people who like pineapple on pizza?,You will be his best friend,You can be a good friend,You can't be friends,They are so right,3
 Where is Dr.J's favorite vacation spot?,Florida,Alabama,Las Vegas,New York,4
 Who was the Eagles’ head coach during the 2025 Super Bowl?,Sean McVay,Nick Sirianni,Andy Reid,Kyle Shanahan,5
 Which NFC team won the 2025 Super Bowl?,49ers,Lions,Cowboys,Eagles,6
@@ -11,7 +11,7 @@ What was the final score of the 2025 Super Bowl?,40-22,31-27,28-24,38-35,9
 How many touchdowns did Jalen Hurts score in the 2025 Super Bowl?,4,2,3,1,10
 What quarter did the Eagles take the lead in the 2025 Super Bowl?,2nd,1st,4th,3rd,11
 Which player had a key interception for the Eagles in the 2025 Super Bowl?,James Bradberry,C.J. Gardner-Johnson,Darius Slay,Hasson Reddick,12
-Who did the Eagles beat in the NFC Championship to reach the 2025 Super Bowl?,Cowboys,Lions,Seahawks,49ers,13
+Who did the Eagles beat in the NFC Championship to reach the 2025 Super Bowl?,Lions,Commanders,Seahawks,49ers,13
 Which song played during the Eagles' celebration?,Eye of the Tiger,Fly Eagles Fly,Stronger,We Are the Champions,14
 How many field goals did the Eagles make in the 2025 Super Bowl?,0,3,2,1,15
 What year did the Eagles last win a Super Bowl before 2025?,2020,2021,2018,2019,16
