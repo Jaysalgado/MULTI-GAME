@@ -140,7 +140,6 @@ public class ClientWindow implements ActionListener
         window.add(mainPanel);
         window.setVisible(true);
 
-
         ClientControl.setGameStateListener(new GameState() {
             @Override
             public void onCanBuzzChanged(boolean canBuzz) {
@@ -168,7 +167,7 @@ public class ClientWindow implements ActionListener
             @Override
             public void onQuestionReceived (String[] q) {
                 SwingUtilities.invokeLater(() -> {
-                    score.setText("SCORE: " + ClientControl.getScore());
+                    feedbackLabel.setText("");
                     String qNum = ClientControl.getQNum();
                     question.setText(qNum + ". " + q[0]);
                     optionGroup.clearSelection();
@@ -178,6 +177,14 @@ public class ClientWindow implements ActionListener
                         i++;
                     }
                     startPhaseTimer(15, "BUZZ");
+                });
+            }
+
+            @Override
+            public void onScoreUpdated (String display) {
+                SwingUtilities.invokeLater(() -> {
+                    score.setText("SCORE: " + ClientControl.getScore());
+                    feedbackLabel.setText(display);
                 });
             }
 
@@ -286,6 +293,7 @@ public class ClientWindow implements ActionListener
             public void run() {
                 SwingUtilities.invokeLater(() -> {
                     if (timeLeft < 0) {
+
                         String endMessage = "BUZZ".equals(phaseName) ? "Waiting for other player to answer ..." : "Did not answer in time!";
                         timer.setText(endMessage);
                         poll.setEnabled(false);

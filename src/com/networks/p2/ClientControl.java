@@ -147,6 +147,8 @@ public class ClientControl {
 
     public void buzz() {
         try {
+            int questionNumber = Integer.parseInt(qNum) - 1;
+            String qNum = String.valueOf(questionNumber);
             byte[] data = qNum.getBytes(StandardCharsets.UTF_8);
             GPacket prep = new GPacket(GPacket.TYPE_BUZZ, clientID, System.currentTimeMillis(), data);
             byte[] packet = prep.convertToBytes();
@@ -219,10 +221,32 @@ public class ClientControl {
     }
 
     private static void setScore(String s) {
+        String result = "";
         switch (s) {
-            case "correct" -> score += 10;
-            case "incorrect" -> score -= 10;
-            case "timeout" -> score -= 20;
+            case "correct" -> {
+
+                    score += 10;
+                    result = "Correct! +10 points";
+            }
+
+
+            case "incorrect" -> {
+
+                    score -= 10;
+                    result = "Incorrect! -10 points";
+            }
+
+
+            case "timeout" -> {
+
+                    score -= 20;
+                    result = "Timeout! -20 points";
+            }
+
+
+        }
+        if (gameStateListener != null) {
+            gameStateListener.onScoreUpdated(result);
         }
     }
 
