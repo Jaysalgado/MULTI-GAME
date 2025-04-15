@@ -351,7 +351,7 @@ public class Server {
             try {
                 questionIndex = Integer.parseInt(dataStr);
             } catch (NumberFormatException e) {
-                System.out.println("[SERVER] Invalid reprocess buzz: " + dataStr);
+                System.out.println("[SERVER] Invalid buzz data from client " + nextBuzzerID + ": " + dataStr);
                 continue;
             }
 
@@ -359,19 +359,18 @@ public class Server {
                 continue;
             }
 
-            System.out.println("[SERVER] Promoting next buzzer: Client " + nextBuzzerID);
+            System.out.println("[SERVER] Reassigning buzzer: Client " + nextBuzzerID);
             setActiveBuzzer(nextBuzzerID);
-            nextClient.sendBuzzResult(true, currentQuestionTimestamp);
-            nextClient.allowAnswer(currentQuestionTimestamp);
             buzzedClients.add(nextBuzzerID);
+            nextClient.sendBuzzResult(true, currentQuestionTimestamp);
+            nextClient.allowAnswer(System.currentTimeMillis());
 
-            break;
+            return;
         }
 
-        if (buzzQueue.isEmpty()) {
-            System.out.println("[SERVER] No remaining valid buzzers.");
-        }
+        System.out.println("[SERVER] No remaining valid buzzers in queue.");
     }
+
 
     private void startAdminConsole() {
         Scanner scanner = new Scanner(System.in);
@@ -402,6 +401,15 @@ public class Server {
         }
     }
 
+    public synchronized boolean hasRemainingBuzzers() {
+        for (GPacket buzz : buzzQueue) {
+            short id = buzz.getNodeID();
+            if (activeClients.containsKey(id) && activeClients.get(id).isRunning()) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public List<Question> getQuestionBank() {
         return questionBank;

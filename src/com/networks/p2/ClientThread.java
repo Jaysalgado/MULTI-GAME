@@ -24,6 +24,9 @@ public class ClientThread implements Runnable {
     private boolean allowedToAnswer = false;
     private Timer answerTimer;
 
+    private long currentQuestionTimestamp;
+
+
     public ClientThread(Socket socket, PriorityBlockingQueue<GPacket> buzzQueue, Server server, short predefinedID) {
         this.clientSocket = socket;
         this.buzzQueue = buzzQueue;
@@ -83,6 +86,7 @@ public class ClientThread implements Runnable {
     }
 
     public void allowAnswer(long questionTimestamp) {
+        this.currentQuestionTimestamp = questionTimestamp;
         allowedToAnswer = true;
 
         answerTimer = new Timer();
@@ -93,7 +97,10 @@ public class ClientThread implements Runnable {
                     allowedToAnswer = false;
                     server.getClientScores().merge(clientID, -20, Integer::sum);
                     sendPacket(new GPacket(GPacket.TYPE_ANSWER_RES, clientID, questionTimestamp, "timeout".getBytes()));
-
+                    if (server.hasRemainingBuzzers()) {
+                        sendBuzzResult(false, questionTimestamp);
+                    }
+                    sendBuzzResult(false, questionTimestamp);
                     server.setActiveBuzzer(null);
                     server.reprocessBuzzQueue();
                 }
@@ -109,7 +116,6 @@ public class ClientThread implements Runnable {
         }
 
         allowedToAnswer = false;
-        server.setActiveBuzzer(null);
         if (answerTimer != null) answerTimer.cancel();
 
         String answer = new String(packet.getData()).trim();
@@ -129,15 +135,21 @@ public class ClientThread implements Runnable {
         int scoreDelta = correct ? 10 : -10;
 
         server.getClientScores().merge(clientID, scoreDelta, Integer::sum);
-
         sendPacket(new GPacket(GPacket.TYPE_ANSWER_RES, clientID, System.currentTimeMillis(), result.getBytes()));
 
         if (!correct) {
+            System.out.println("[ClientThread " + clientID + "] answered incorrectly. Passing to next buzzer.");
+
             server.setActiveBuzzer(null);
+            boolean hasMoreBuzzers = server.hasRemainingBuzzers();
+            if (hasMoreBuzzers) {
+                sendBuzzResult(false, currentQuestionTimestamp);
+            }
             server.reprocessBuzzQueue();
+        } else {
+            server.setActiveBuzzer(null);
         }
     }
-
 
     public void sendPacket(GPacket packet) {
         try {
