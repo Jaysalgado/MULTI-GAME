@@ -398,6 +398,9 @@ public class Server {
             } else {
                 System.out.println("[SERVER] Try: kill [clientID]");
             }
+            if (input.equals("clients")) {
+                activeClients.keySet().forEach(id -> System.out.println("Current clients: " + id));
+            }
         }
     }
 
@@ -440,4 +443,6 @@ public class Server {
     public synchronized void setActiveBuzzer(Short id) { this.activeBuzzer = id; }
 
     public synchronized Short getActiveBuzzer() { return this.activeBuzzer; }
+
+    public synchronized long getCurrentQuestionTimestamp() { return this.currentQuestionTimestamp; }
 }

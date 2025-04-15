@@ -100,7 +100,6 @@ public class ClientThread implements Runnable {
                     if (server.hasRemainingBuzzers()) {
                         sendBuzzResult(false, questionTimestamp);
                     }
-                    sendBuzzResult(false, questionTimestamp);
                     server.setActiveBuzzer(null);
                     server.reprocessBuzzQueue();
                 }
@@ -140,11 +139,11 @@ public class ClientThread implements Runnable {
         if (!correct) {
             System.out.println("[ClientThread " + clientID + "] answered incorrectly. Passing to next buzzer.");
 
-            server.setActiveBuzzer(null);
-            boolean hasMoreBuzzers = server.hasRemainingBuzzers();
-            if (hasMoreBuzzers) {
-                sendBuzzResult(false, currentQuestionTimestamp);
+            if (server.hasRemainingBuzzers()) {
+                sendBuzzResult(false, server.getCurrentQuestionTimestamp());
             }
+
+            server.setActiveBuzzer(null);
             server.reprocessBuzzQueue();
         } else {
             server.setActiveBuzzer(null);
@@ -175,9 +174,10 @@ public class ClientThread implements Runnable {
 
         server.getPreviousClientScores().put(clientID, server.getClientScores().getOrDefault(clientID, 0));
 
-        if (buzzQueue.peek() != null && buzzQueue.peek().getNodeID() == clientID) {
-            System.out.println("[ClientThread " + clientID + "] was active buzzer and disconnected — reprocessing buzz queue...");
-            buzzQueue.poll();
+        if (server.getActiveBuzzer() != null && server.getActiveBuzzer() == clientID) {
+            System.out.println("[ClientThread " + clientID + "] was active buzzer and disconnected — next in line:");
+            server.setActiveBuzzer(null);
+            server.reprocessBuzzQueue();
         }
 
 
