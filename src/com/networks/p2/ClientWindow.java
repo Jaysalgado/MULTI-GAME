@@ -167,7 +167,6 @@ public class ClientWindow implements ActionListener
             @Override
             public void onQuestionReceived (String[] q) {
                 SwingUtilities.invokeLater(() -> {
-                    feedbackLabel.setText("");
                     String qNum = ClientControl.getQNum();
                     question.setText(qNum + ". " + q[0]);
                     optionGroup.clearSelection();
@@ -185,6 +184,8 @@ public class ClientWindow implements ActionListener
                 SwingUtilities.invokeLater(() -> {
                     score.setText("SCORE: " + ClientControl.getScore());
                     feedbackLabel.setText(display);
+                    new javax.swing.Timer(4000, e -> feedbackLabel.setText("")).start();
+
                 });
             }
 
@@ -277,7 +278,6 @@ public class ClientWindow implements ActionListener
             default:
                 System.out.println("Button error");
         }
-
 
     }
 
