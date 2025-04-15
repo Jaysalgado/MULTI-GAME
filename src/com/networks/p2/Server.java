@@ -51,6 +51,7 @@ public class Server {
 
         udpThread = new UDPThread(UDP_PORT, buzzQueue);
         new Thread(udpThread).start();
+        new Thread(this::startAdminConsole).start();
 
         try (ServerSocket serverSocket = new ServerSocket(TCP_PORT)) {
             System.out.println("[SERVER] Listening on TCP port " + TCP_PORT + "...");
@@ -335,21 +336,72 @@ public class Server {
 
     public synchronized void reprocessBuzzQueue() {
         while (!buzzQueue.isEmpty()) {
-            boolean newBuzzWinner = processBuzzes(currentQuestionTimestamp);
+            GPacket nextBuzz = buzzQueue.poll();
+            if (nextBuzz == null) continue;
 
-            if (newBuzzWinner) {
-                System.out.println("[SERVER] New buzzer found from queue.");
-                try {
-                    Thread.sleep(10_000);
-                } catch (InterruptedException e) {
-                    System.err.println("[SERVER] Interrupted while waiting after reassignment.");
-                }
-                return;
+            short nextBuzzerID = nextBuzz.getNodeID();
+            ClientThread nextClient = activeClients.get(nextBuzzerID);
+
+            if (nextClient == null || !nextClient.isRunning()) {
+                continue;
             }
+
+            String dataStr = new String(nextBuzz.getData()).trim();
+            int questionIndex;
+            try {
+                questionIndex = Integer.parseInt(dataStr);
+            } catch (NumberFormatException e) {
+                System.out.println("[SERVER] Invalid reprocess buzz: " + dataStr);
+                continue;
+            }
+
+            if (questionIndex != currentQuestionIndex) {
+                continue;
+            }
+
+            System.out.println("[SERVER] Promoting next buzzer: Client " + nextBuzzerID);
+            setActiveBuzzer(nextBuzzerID);
+            nextClient.sendBuzzResult(true, currentQuestionTimestamp);
+            nextClient.allowAnswer(currentQuestionTimestamp);
+            buzzedClients.add(nextBuzzerID);
+
+            break;
         }
 
-        System.out.println("[SERVER] No remaining buzzers to reassign.");
+        if (buzzQueue.isEmpty()) {
+            System.out.println("[SERVER] No remaining valid buzzers.");
+        }
     }
+
+    private void startAdminConsole() {
+        Scanner scanner = new Scanner(System.in);
+        while (true) {
+            String input = scanner.nextLine();
+            if (input.startsWith("kill")) {
+                String[] parts = input.split("\\s+");
+                if (parts.length == 2) {
+                    try {
+                        short clientID = Short.parseShort(parts[1]);
+                        ClientThread target = activeClients.get(clientID);
+                        if (target != null) {
+                            System.out.println("[SERVER] Killing client " + clientID);
+                            target.sendPacket(new GPacket(GPacket.TYPE_KILL, clientID, System.currentTimeMillis(), "Killed by admin".getBytes()));
+                            target.forceDisconnect();
+                        } else {
+                            System.out.println("[SERVER] No active client with ID: " + clientID);
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("[SERVER] Invalid client ID.");
+                    }
+                } else {
+                    System.out.println("[SERVER] Kill [clientID]");
+                }
+            } else {
+                System.out.println("[SERVER] Try: kill [clientID]");
+            }
+        }
+    }
+
 
     public List<Question> getQuestionBank() {
         return questionBank;

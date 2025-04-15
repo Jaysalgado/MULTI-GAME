@@ -93,6 +93,9 @@ public class ClientThread implements Runnable {
                     allowedToAnswer = false;
                     server.getClientScores().merge(clientID, -20, Integer::sum);
                     sendPacket(new GPacket(GPacket.TYPE_ANSWER_RES, clientID, questionTimestamp, "timeout".getBytes()));
+
+                    server.setActiveBuzzer(null);
+                    server.reprocessBuzzQueue();
                 }
             }
         }, 10_000);
@@ -128,6 +131,11 @@ public class ClientThread implements Runnable {
         server.getClientScores().merge(clientID, scoreDelta, Integer::sum);
 
         sendPacket(new GPacket(GPacket.TYPE_ANSWER_RES, clientID, System.currentTimeMillis(), result.getBytes()));
+
+        if (!correct) {
+            server.setActiveBuzzer(null);
+            server.reprocessBuzzQueue();
+        }
     }
 
 
@@ -170,6 +178,15 @@ public class ClientThread implements Runnable {
             System.out.println("[ClientThread " + clientID + "] Sending too many invalid packets. Terminating.");
             sendPacket(new GPacket(GPacket.TYPE_KILL, clientID, System.currentTimeMillis(), "Too many invalid packets".getBytes()));
             closeConnection();
+        }
+    }
+
+    public void forceDisconnect() {
+        running = false;
+        try {
+            clientSocket.close();
+        } catch (IOException e) {
+            System.err.println("[ClientThread " + clientID + "] Error during kill switch.");
         }
     }
 
