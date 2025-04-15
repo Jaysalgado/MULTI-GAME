@@ -171,11 +171,13 @@ public class Server {
             boolean someoneBuzzed = processBuzzes(currentQuestionIndex);
 
             if (someoneBuzzed) {
-                System.out.println("[GAME] Waiting 10 seconds for answer...");
-                try {
-                    Thread.sleep(10_000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                System.out.println("[GAME] Waiting for all buzzers to finish answering...");
+                while (getActiveBuzzer() != null || hasRemainingBuzzers()) {
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
 
