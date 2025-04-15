@@ -169,7 +169,8 @@ public class ClientWindow implements ActionListener
             public void onQuestionReceived (String[] q) {
                 SwingUtilities.invokeLater(() -> {
                     score.setText("SCORE: " + ClientControl.getScore());
-                    question.setText(q[0]);
+                    String qNum = ClientControl.getQNum();
+                    question.setText(qNum + ". " + q[0]);
                     optionGroup.clearSelection();
                     int  i = 1;
                     for (JRadioButton option : options) {

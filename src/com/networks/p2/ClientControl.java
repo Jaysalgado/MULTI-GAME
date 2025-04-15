@@ -209,7 +209,9 @@ public class ClientControl {
     }
 
     private static void setQNum(String n){
-        qNum = n;
+        int num = Integer.parseInt(n) + 1;
+         qNum = String.valueOf(num);
+
     }
 
     public static String getQNum() {
