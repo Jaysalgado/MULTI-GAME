@@ -294,7 +294,7 @@ public class ClientWindow implements ActionListener
                 SwingUtilities.invokeLater(() -> {
                     if (timeLeft < 0) {
 
-                        String endMessage = "BUZZ".equals(phaseName) ? "Waiting for other player to answer ..." : "Did not answer in time!";
+                        String endMessage = "Waiting for other player to answer ...";
                         timer.setText(endMessage);
                         poll.setEnabled(false);
                         submit.setEnabled(false);
