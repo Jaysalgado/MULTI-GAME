@@ -317,6 +317,7 @@ public class ClientControl {
             if (tcpSocket != null && !tcpSocket.isClosed()) tcpSocket.close();
             if (receiveSocket != null && !receiveSocket.isClosed()) receiveSocket.close();
             if (sendSocket != null && !sendSocket.isClosed()) sendSocket.close();
+            gameStateListener.onKill();
         } catch (IOException e) {
             e.printStackTrace();
         }

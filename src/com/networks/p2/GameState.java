@@ -6,5 +6,6 @@ public interface GameState {
     void onQuestionReceived(String[] question);
     void onGameOver(String[] results);
     void onScoreUpdated(String display);
+    void onKill();
 //    void onStatusChanged(boolean status);
 }

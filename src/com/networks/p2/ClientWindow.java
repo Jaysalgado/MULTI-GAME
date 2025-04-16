@@ -190,6 +190,13 @@ public class ClientWindow implements ActionListener
             }
 
             @Override
+            public void onKill () {
+                SwingUtilities.invokeLater(() -> {
+                    window.dispose();
+                });
+            }
+
+            @Override
             public void onGameOver (String[] results) {
                 SwingUtilities.invokeLater(() -> {
                     // Create new main panel with same style
